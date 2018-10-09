@@ -1,3 +1,6 @@
+ENV['AWS_ACCESS_KEY_ID'] ||= 'bogus'
+ENV['AWS_SECRET_ACCESS_KEY'] ||= 'bogusbogusbogusbogusbogus'
+
 require 'rspec'
 require 'bfs'
 require 'bfs/s3'

@@ -55,7 +55,7 @@ RSpec.describe BFS::Bucket::S3 do
   # stub copy_object calls
   before do
     allow(client).to receive(:copy_object).with(hash_including(bucket: 'mock-bucket')) do |opts|
-      src = opts[:copy_source].delete_prefix('/mock-bucket/')
+      src = opts[:copy_source].sub('/mock-bucket/', '')
       raise Aws::S3::Errors::NoSuchKey.new(nil, nil) unless files.key?(src)
 
       files[opts[:key]] = files[src]

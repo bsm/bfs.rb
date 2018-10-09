@@ -13,15 +13,15 @@ module BFS
 
       # Lists the contents of a bucket using a glob pattern
       def ls(pattern='**/*', _opts={})
-        @root.glob(pattern).select(&:file?).map do |name|
-          name.to_s.delete_prefix(@prefix)
+        Pathname.glob(@root.join(pattern)).select(&:file?).map do |name|
+          name.to_s.sub(@prefix, '')
         end
       end
 
       # Info returns the info for a single file
       def info(path, _opts={})
         name = @root.join(norm_path(path))
-        path = name.to_s.delete_prefix(@prefix)
+        path = name.to_s.sub(@prefix, '')
         BFS::FileInfo.new(path, name.size, name.mtime)
       rescue Errno::ENOENT
         raise BFS::FileNotFound, path

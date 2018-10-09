@@ -1,6 +1,6 @@
 # BFS
 
-[![Build Status](https://travis-ci.org/bsm/bfs.png?branch=master)](https://travis-ci.org/bsm/bfs)
+[![Build Status](https://travis-ci.org/bsm/bfs.rb.png?branch=master)](https://travis-ci.org/bsm/bfs.rb)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Minimalist abstraction for bucket storage.

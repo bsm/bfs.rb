@@ -1,6 +1,10 @@
 inherit_from:
   - https://storage.googleapis.com/bsm-misc/rubocop.yml
 
+AllCops:
+  Exclude:
+    - "vendor/**/*"
+
 Security/Open:
   Exclude:
     - "core/lib/bfs/bucket/abstract.rb"
