@@ -1,0 +1,10 @@
+language: ruby
+before_install:
+  - gem install rake
+before_script:
+  - rake deps
+script:
+  - rake
+rvm:
+  - 2.5
+  - 2.4
