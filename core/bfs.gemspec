@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'bfs'
-  s.version     = '0.1.0'
+  s.version     = File.read(File.expand_path('../.version', __dir__)).strip
   s.platform    = Gem::Platform::RUBY
 
   s.licenses    = ['Apache-2.0']
