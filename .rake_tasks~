@@ -1,0 +1,7 @@
+core:build
+core:install
+core:install:local
+core:release[remote]
+rubocop
+rubocop:auto_correct
+spec
