@@ -83,7 +83,13 @@ BFS.register('file') do |url|
   params = CGI.parse(url.query.to_s)
 
   parts = [url.host, url.path].compact
-  root  = File.join(*parts)
-  root  = File.dirname(root) if params.key?('use') && params['use'].first == 'dir'
+  root  = case params.key?('scope') && params['scope'].first
+          when 'root'
+            '/'
+          when 'dir'
+            File.dirname(File.join(*parts))
+          else
+            File.join(*parts)
+          end
   BFS::Bucket::FS.new root
 end
