@@ -1,12 +1,12 @@
 PATH
   remote: core
   specs:
-    bfs (0.2.0)
+    bfs (0.2.1)
 
 PATH
   remote: s3
   specs:
-    bfs-s3 (0.2.0)
+    bfs-s3 (0.2.1)
       aws-sdk-s3
       bfs
 

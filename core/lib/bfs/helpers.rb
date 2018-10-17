@@ -15,7 +15,13 @@ module BFS
       @tempfile.write(data)
     end
 
+    def closed?
+      @tempfile.closed?
+    end
+
     def close
+      return if closed?
+
       path = @tempfile.path
       @tempfile.close
       @closer.call(path) if @closer
