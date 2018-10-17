@@ -1,4 +1,5 @@
 require 'bfs'
+require 'cgi'
 require 'fileutils'
 require 'pathname'
 
@@ -79,6 +80,10 @@ module BFS
 end
 
 BFS.register('file') do |url|
+  params = CGI.parse(url.query.to_s)
+
   parts = [url.host, url.path].compact
-  BFS::Bucket::FS.new File.join(*parts)
+  root  = File.join(*parts)
+  root  = File.dirname(root) if params.key?('use') && params['use'].first == 'dir'
+  BFS::Bucket::FS.new root
 end

@@ -129,7 +129,7 @@ module BFS
 end
 
 BFS.register('s3') do |url|
-  params = CGI.parse(url.query)
+  params = CGI.parse(url.query.to_s)
 
   BFS::Bucket::S3.new url.host,
     region: params.key?('region') ? params['region'].first : nil,
