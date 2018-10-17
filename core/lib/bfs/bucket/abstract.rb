@@ -57,7 +57,7 @@ module BFS
       protected
 
       def norm_path(path)
-        path.gsub(File::SEPARATOR, '/').sub(%r{^/+}, '')
+        BFS.norm_path(path)
       end
     end
   end

@@ -77,3 +77,8 @@ module BFS
     end
   end
 end
+
+BFS.register('file') do |url|
+  parts = [url.host, url.path].compact
+  BFS::Bucket::FS.new File.join(*parts)
+end
