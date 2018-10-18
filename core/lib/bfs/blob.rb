@@ -5,8 +5,10 @@ module BFS
 
     def initialize(url)
       url = URI.parse(url) unless url.is_a?(::URI)
+      @path = BFS.norm_path(url.path)
+
+      url.path = '/'
       @bucket = BFS.resolve(url)
-      @path   = BFS.norm_path(url.path)
     end
 
     # Info returns the blob info
