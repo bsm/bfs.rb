@@ -77,7 +77,7 @@ module BFS
         opts[:storage_class] ||= @storage_class if @storage_class
 
         temp = BFS::TempWriter.new(path) do |t|
-          File.open(t) do |file|
+          File.open(t, binmode: true) do |file|
             @client.put_object(opts.merge(body: file))
           end
         end
@@ -103,7 +103,7 @@ module BFS
         )
         @client.get_object(opts)
 
-        File.open(temp.path, &block)
+        File.open(temp.path, binmode: true, &block)
       rescue Aws::S3::Errors::NoSuchKey, Aws::S3::Errors::NoSuchBucket
         raise BFS::FileNotFound, path
       end

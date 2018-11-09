@@ -8,7 +8,7 @@ RSpec.describe BFS::Bucket::FS do
   it_behaves_like 'a bucket'
 
   it 'should resolve from URL' do
-    File.open(File.join(tmpdir, 'test.txt'), 'w') {|f| f.write 'TESTDATA' }
+    File.open(File.join(tmpdir, 'test.txt'), 'wb') {|f| f.write 'TESTDATA' }
 
     bucket = BFS.resolve("file://#{tmpdir}")
     expect(bucket).to be_instance_of(described_class)

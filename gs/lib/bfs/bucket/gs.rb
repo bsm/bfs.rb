@@ -57,7 +57,7 @@ module BFS
       def create(path, opts={}, &block)
         path = norm_path(path)
         temp = BFS::TempWriter.new(path) do |t|
-          File.open(t) do |file|
+          File.open(t, binmode: true) do |file|
             @bucket.create_file(file, path, opts)
           end
         end
@@ -78,9 +78,9 @@ module BFS
 
         temp = Tempfile.new(File.basename(path), binmode: true)
         temp.close
-        file.download(temp.path, opts.slice(:verify, :encryption_key, :skip_decompress))
+        file.download temp.path, opts
 
-        File.open(temp.path, &block)
+        File.open(temp.path, binmode: true, &block)
       end
 
       # Deletes a file.
