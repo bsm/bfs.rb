@@ -12,6 +12,6 @@ RSpec.describe BFS::Bucket::FS do
 
     bucket = BFS.resolve("file://#{tmpdir}")
     expect(bucket).to be_instance_of(described_class)
-    expect(bucket.ls).to eq(['test.txt'])
+    expect(bucket.ls.to_a).to eq(['test.txt'])
   end
 end

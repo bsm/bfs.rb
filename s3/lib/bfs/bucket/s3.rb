@@ -36,9 +36,17 @@ module BFS
 
       # Lists the contents of a bucket using a glob pattern
       def ls(pattern='**/*', opts={})
-        @client.list_objects_v2(opts.merge(bucket: name)).contents.select do |obj|
-          File.fnmatch?(pattern, obj.key, File::FNM_PATHNAME)
-        end.map(&:key)
+        next_token = nil
+        Enumerator.new do |y|
+          loop do
+            resp = @client.list_objects_v2 opts.merge(bucket: name, continuation_token: next_token)
+            resp.contents.each do |obj|
+              y << obj.key if File.fnmatch?(pattern, obj.key, File::FNM_PATHNAME)
+            end
+            next_token = resp.next_continuation_token.to_s
+            break if next_token.empty?
+          end
+        end
       end
 
       # Info returns the object info
@@ -85,7 +93,7 @@ module BFS
       # Opens an existing file for reading
       def open(path, opts={}, &block)
         path = norm_path(path)
-        temp = Tempfile.new(File.basename(path))
+        temp = Tempfile.new(File.basename(path), binmode: true)
         temp.close
 
         opts = opts.merge(

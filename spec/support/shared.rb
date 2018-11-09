@@ -7,19 +7,20 @@ RSpec.shared_examples 'a bucket' do
   end
 
   it 'should ls' do
-    expect(subject.ls).to match_array [
+    expect(subject.ls).to be_a(Enumerator)
+    expect(subject.ls.to_a).to match_array [
       'a/b.txt',
       'a/b/c.txt',
       'a/b/c/d.txt',
       'a/b/c/d/e.txt',
     ]
-    expect(subject.ls('**/c*')).to match_array [
+    expect(subject.ls('**/c*').to_a).to match_array [
       'a/b/c.txt',
     ]
-    expect(subject.ls('a/b/*/*')).to match_array [
+    expect(subject.ls('a/b/*/*').to_a).to match_array [
       'a/b/c/d.txt',
     ]
-    expect(subject.ls('x/**')).to be_empty
+    expect(subject.ls('x/**').to_a).to be_empty
   end
 
   it 'should return info' do
@@ -71,7 +72,7 @@ RSpec.shared_examples 'a bucket' do
 
   it 'should copy' do
     subject.cp('a/b/c.txt', 'x.txt')
-    expect(subject.ls.size).to eq(5)
+    expect(subject.ls.count).to eq(5)
     expect(subject.read('x.txt')).to eq('TESTDATA-c')
 
     expect { subject.cp('missing.txt', 'x.txt') }.to raise_error(BFS::FileNotFound)
@@ -79,7 +80,7 @@ RSpec.shared_examples 'a bucket' do
 
   it 'should move' do
     subject.mv('a/b/c.txt', 'x.txt')
-    expect(subject.ls.size).to eq(4)
+    expect(subject.ls.count).to eq(4)
     expect(subject.read('x.txt')).to eq('TESTDATA-c')
     expect { subject.read('a/b/c.txt') }.to raise_error(BFS::FileNotFound)
 

@@ -1,10 +1,10 @@
 Gem::Specification.new do |s|
-  s.name        = 'bfs-s3'
+  s.name        = 'bfs-gs'
   s.version     = File.read(File.expand_path('../.version', __dir__)).strip
   s.platform    = Gem::Platform::RUBY
 
   s.licenses    = ['Apache-2.0']
-  s.summary     = 'S3 bucket adapter for bfs'
+  s.summary     = 'GS bucket adapter for bfs'
   s.description = 'https://github.com/bsm/bfs.rb'
 
   s.authors     = ['Dimitrij Denissenko']
@@ -17,6 +17,6 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
   s.required_ruby_version = '>= 2.2.0'
 
-  s.add_dependency 'aws-sdk-s3'
   s.add_dependency 'bfs', s.version
+  s.add_dependency 'google-cloud-storage'
 end

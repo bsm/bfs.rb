@@ -4,7 +4,7 @@ module BFS
   class TempWriter
     def initialize(name, &closer)
       @closer = closer
-      @tempfile = ::Tempfile.new(File.basename(name.to_s))
+      @tempfile = ::Tempfile.new(File.basename(name.to_s), binmode: true)
     end
 
     def path

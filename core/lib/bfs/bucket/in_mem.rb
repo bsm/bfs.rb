@@ -13,8 +13,10 @@ module BFS
 
       # Lists the contents of a bucket using a glob pattern
       def ls(pattern='**/*', _opts={})
-        @files.each_key.select do |key|
-          File.fnmatch?(pattern, key, File::FNM_PATHNAME)
+        Enumerator.new do |y|
+          @files.each_key do |key|
+            y << key if File.fnmatch?(pattern, key, File::FNM_PATHNAME)
+          end
         end
       end
 
