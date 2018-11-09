@@ -37,9 +37,11 @@ module BFS
 
       # Lists the contents of a bucket using a glob pattern
       def ls(pattern='**/*', opts={})
-        @bucket.files(opts).lazy.select do |file|
-          File.fnmatch?(pattern, file.name, File::FNM_PATHNAME)
-        end.map(&:name).each
+        Enumerator.new do |y|
+          @bucket.files(opts).each do |file|
+            y << file.name if File.fnmatch?(pattern, file.name, File::FNM_PATHNAME)
+          end
+        end
       end
 
       # Info returns the object info
