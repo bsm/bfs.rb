@@ -1,21 +1,21 @@
 PATH
   remote: core
   specs:
-    bfs (0.3.1)
+    bfs (0.3.2)
 
 PATH
   remote: gs
   specs:
-    bfs-gs (0.3.1)
-      bfs (= 0.3.1)
+    bfs-gs (0.3.2)
+      bfs (= 0.3.2)
       google-cloud-storage
 
 PATH
   remote: s3
   specs:
-    bfs-s3 (0.3.1)
+    bfs-s3 (0.3.2)
       aws-sdk-s3
-      bfs (= 0.3.1)
+      bfs (= 0.3.2)
 
 GEM
   remote: https://rubygems.org/
