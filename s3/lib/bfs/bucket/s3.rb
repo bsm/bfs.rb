@@ -22,14 +22,15 @@ module BFS
       def initialize(name, opts={})
         opts = opts.dup
         opts.keys.each do |key|
-          opts[key.to_s] = opts.delete(key)
+          val = opts.delete(key)
+          opts[key.to_s] = val unless val.nil?
         end
 
         @name = name
         @sse = opts['sse'] || opts['server_side_encryption']
         @credentials = opts['credentials']
         @credentials ||= Aws::Credentials.new(opts['access_key_id'].to_s, opts['secret_access_key'].to_s) if opts['access_key_id']
-        @acl = opts['acl'].to_sym if opts.key?('acl')
+        @acl = opts['acl'].to_sym if opts['acl']
         @storage_class = opts['storage_class']
         @client = opts['client'] || Aws::S3::Client.new(region: opts['region'])
       end
