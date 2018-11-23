@@ -54,6 +54,9 @@ module BFS
         rm(src)
       end
 
+      # Closes the underlying connection
+      def close; end
+
       protected
 
       def norm_path(path)
