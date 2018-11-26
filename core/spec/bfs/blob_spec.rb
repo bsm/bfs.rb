@@ -17,10 +17,10 @@ RSpec.describe BFS::Blob do
 
     it 'should write/read' do
       expect { subject.read }.to raise_error(BFS::FileNotFound)
-      subject.write('TESTDATA')
+      subject.write('TESTDATA', content_type: 'text/plain', metadata: { 'key' => 'val' })
 
       info = subject.info
-      expect(info).to eq(BFS::FileInfo.new('path/to/file.txt', 8, info.mtime))
+      expect(info).to eq(BFS::FileInfo.new('path/to/file.txt', 8, info.mtime, 'text/plain', 'key' => 'val'))
       expect(info.mtime).to be_within(1).of(Time.now)
 
       expect(subject.read).to eq('TESTDATA')
@@ -49,11 +49,11 @@ RSpec.describe BFS::Blob do
     it 'should write/read' do
       expect { subject.read }.to raise_error(BFS::FileNotFound)
 
-      subject.write('TESTDATA')
+      subject.write('TESTDATA', content_type: 'text/plain', metadata: { 'key' => 'val' })
       expect(subject.read).to eq('TESTDATA')
 
       info = subject.info
-      expect(info).to eq(BFS::FileInfo.new(path, 8, info.mtime))
+      expect(info).to eq(BFS::FileInfo.new(path, 8, info.mtime, nil, {}))
       expect(info.mtime).to be_within(1).of(Time.now)
 
       expect(Pathname.glob("#{tmpdir}/**/*").select(&:file?).map(&:to_s)).to eq [

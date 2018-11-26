@@ -27,16 +27,14 @@ RSpec.describe BFS::Bucket::S3 do
 
     allow(client).to receive(:list_objects_v2).with(bucket: 'mock-bucket', continuation_token: nil) do |*|
       contents = files.keys.map {|key| Aws::S3::Types::Object.new(key: key) }
-      double 'ListObjectsV2Response', contents: contents, next_continuation_token: ''
+      Aws::S3::Types::ListObjectsV2Output.new contents: contents, next_continuation_token: ''
     end
-    allow(client).to receive(:list_objects_v2).with(bucket: 'mock-bucket', max_keys: 1, prefix: 'a/b/c.txt') do |*|
-      obj = Aws::S3::Types::Object.new(key: 'a/b/c.txt', size: 10, last_modified: Time.now)
-      double 'ListObjectsV2Response', contents: [obj]
+    allow(client).to receive(:head_object).with(bucket: 'mock-bucket', key: 'a/b/c.txt') do |*|
+      Aws::S3::Types::HeadObjectOutput.new content_length: 10, last_modified: Time.now, content_type: 'text/plain', metadata: { 'key' => 'val' }
     end
-    allow(client).to receive(:list_objects_v2).with(bucket: 'mock-bucket', max_keys: 1, prefix: 'missing.txt') do |*|
-      double 'ListObjectsV2Response', contents: []
+    allow(client).to receive(:head_object).with(bucket: 'mock-bucket', key: 'missing.txt') do |*|
+      raise Aws::S3::Errors::NoSuchKey.new(nil, nil)
     end
-
     allow(client).to receive(:copy_object).with(hash_including(bucket: 'mock-bucket')) do |opts|
       src = opts[:copy_source].sub('/mock-bucket/', '')
       raise Aws::S3::Errors::NoSuchKey.new(nil, nil) unless files.key?(src)

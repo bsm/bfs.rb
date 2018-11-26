@@ -5,10 +5,15 @@ module BFS
   module Bucket
     # InMem buckets are useful for tests
     class InMem < Abstract
-      Entry = Struct.new(:io, :mtime)
+      Entry = Struct.new(:io, :mtime, :content_type, :metadata)
 
       def initialize
         @files = {}
+      end
+
+      # Reset bucket and clear all files.
+      def clear
+        @files.clear
       end
 
       # Lists the contents of a bucket using a glob pattern
@@ -26,13 +31,13 @@ module BFS
         raise BFS::FileNotFound, path unless @files.key?(path)
 
         entry = @files[path]
-        BFS::FileInfo.new(path, entry.io.size, entry.mtime)
+        BFS::FileInfo.new(path, entry.io.size, entry.mtime, entry.content_type, entry.metadata)
       end
 
       # Creates a new file and opens it for writing
-      def create(path, _opts={}, &block)
+      def create(path, opts={}, &block)
         io = StringIO.new
-        @files[norm_path(path)] = Entry.new(io, Time.now)
+        @files[norm_path(path)] = Entry.new(io, Time.now, opts[:content_type], opts[:metadata] || {})
         return io unless block
 
         begin

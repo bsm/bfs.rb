@@ -24,7 +24,7 @@ module BFS
       def info(path, _opts={})
         full = @root.join(norm_path(path))
         path = trim_prefix(full.to_s)
-        BFS::FileInfo.new(path, full.size, full.mtime)
+        BFS::FileInfo.new(path, full.size, full.mtime, nil, {})
       rescue Errno::ENOENT
         raise BFS::FileNotFound, path
       end

@@ -1,7 +1,7 @@
 require 'uri'
 
 module BFS
-  FileInfo = Struct.new(:path, :size, :mtime)
+  FileInfo = Struct.new(:path, :size, :mtime, :content_type, :metadata)
 
   def self.register(scheme, &resolver)
     @registry ||= {}

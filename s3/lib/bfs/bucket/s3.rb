@@ -55,13 +55,12 @@ module BFS
         path = norm_path(path)
         opts = opts.merge(
           bucket: name,
-          max_keys: 1,
-          prefix: opts[:prefix] ? File.join(opts[:prefix], path) : path,
+          key: opts[:prefix] ? File.join(opts[:prefix], path) : path,
         )
-        object = @client.list_objects_v2(opts).contents.first
-        raise BFS::FileNotFound, path unless object
+        info = @client.head_object(opts)
+        raise BFS::FileNotFound, path unless info
 
-        BFS::FileInfo.new(path, object.size, object.last_modified)
+        BFS::FileInfo.new(path, info.content_length, info.last_modified, info.content_type, info.metadata)
       rescue Aws::S3::Errors::NoSuchKey, Aws::S3::Errors::NoSuchBucket
         raise BFS::FileNotFound, path
       end

@@ -50,7 +50,7 @@ module BFS
         file = @bucket.file(path)
         raise BFS::FileNotFound, path unless file
 
-        BFS::FileInfo.new(path, file.size, file.updated_at)
+        BFS::FileInfo.new(path, file.size, file.updated_at, file.content_type, file.metadata)
       end
 
       # Creates a new file and opens it for writing

@@ -24,6 +24,8 @@ RSpec.describe BFS::Bucket::GS do
       name: name,
       data: data,
       size: data.bytesize,
+      content_type: 'text/plain',
+      metadata: {},
       updated_at: Time.now
     allow(file).to receive(:download) do |path, _|
       File.open(path, 'wb') {|f| f.write file.data }
