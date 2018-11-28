@@ -11,6 +11,8 @@ run_spec = \
   begin
     s = Google::Cloud::Storage.new(project_id: GS_SANDBOX[:project])
     !s.bucket(GS_SANDBOX[:bucket]).nil?
+  rescue Signet::AuthorizationError
+    false
   end
 
 RSpec.describe BFS::Bucket::GS, if: run_spec do

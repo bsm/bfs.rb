@@ -3,9 +3,14 @@ require 'spec_helper'
 S3_SANDBOX = { region: 'us-east-1', bucket: 'bsm-bfs-unittest' }.freeze
 run_spec = \
   begin
-    c = Aws::S3::Client.new(region: S3_SANDBOX[:region], credentials: Aws::SharedCredentials.new)
-    c.head_bucket(bucket: S3_SANDBOX[:bucket])
-    true
+    c = Aws::SharedCredentials.new
+    if c.loadable?
+      s = Aws::S3::Client.new(region: S3_SANDBOX[:region], credentials: c)
+      s.head_bucket(bucket: S3_SANDBOX[:bucket])
+      true
+    else
+      false
+    end
   rescue Aws::Errors::ServiceError
     false
   end
