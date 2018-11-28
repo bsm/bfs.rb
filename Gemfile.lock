@@ -1,21 +1,21 @@
 PATH
   remote: core
   specs:
-    bfs (0.3.3)
+    bfs (0.3.4)
 
 PATH
   remote: gs
   specs:
-    bfs-gs (0.3.3)
-      bfs (= 0.3.3)
+    bfs-gs (0.3.4)
+      bfs (= 0.3.4)
       google-cloud-storage
 
 PATH
   remote: s3
   specs:
-    bfs-s3 (0.3.3)
+    bfs-s3 (0.3.4)
       aws-sdk-s3
-      bfs (= 0.3.3)
+      bfs (= 0.3.4)
 
 GEM
   remote: https://rubygems.org/
@@ -24,16 +24,16 @@ GEM
       public_suffix (>= 2.0.2, < 4.0)
     ast (2.4.0)
     aws-eventstream (1.0.1)
-    aws-partitions (1.116.0)
-    aws-sdk-core (3.39.0)
+    aws-partitions (1.118.0)
+    aws-sdk-core (3.41.0)
       aws-eventstream (~> 1.0)
       aws-partitions (~> 1.0)
       aws-sigv4 (~> 1.0)
       jmespath (~> 1.0)
-    aws-sdk-kms (1.12.0)
+    aws-sdk-kms (1.13.0)
       aws-sdk-core (~> 3, >= 3.39.0)
       aws-sigv4 (~> 1.0)
-    aws-sdk-s3 (1.26.0)
+    aws-sdk-s3 (1.27.0)
       aws-sdk-core (~> 3, >= 3.39.0)
       aws-sdk-kms (~> 1)
       aws-sigv4 (~> 1.0)
@@ -42,7 +42,7 @@ GEM
     declarative-option (0.1.0)
     diff-lcs (1.3)
     digest-crc (0.4.1)
-    faraday (0.15.3)
+    faraday (0.15.4)
       multipart-post (>= 1.2, < 3)
     google-api-client (0.25.0)
       addressable (~> 2.5, >= 2.5.1)
