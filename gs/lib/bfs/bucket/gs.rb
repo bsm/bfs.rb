@@ -15,6 +15,7 @@ module BFS
       # @option opts [String] :project_id project ID. Defaults to GCP_PROJECT  env var. Required.
       # @option opts [String, Hash, Google::Auth::Credentials] :credentials
       #   the path to the keyfile as a String, the contents of the keyfile as a Hash, or a Google::Auth::Credentials object.
+      # @option opts [String] :prefix custom namespace within the bucket
       # @option opts [Integer] :retries number of times to retry requests. Default: 3.
       # @option opts [Integer] :timeout request timeout, in seconds.
       # @option opts [String] :acl set the default ACL.
@@ -27,8 +28,9 @@ module BFS
         end
         opts[:project_id] ||= ENV['GCP_PROJECT'] || ENV['GCLOUD_PROJECT']
 
-        acl    = opts.delete(:acl)
-        client = opts.delete(:client) || Google::Cloud::Storage.new(opts)
+        @prefix = opts.delete(:prefix)
+        acl     = opts.delete(:acl)
+        client  = opts.delete(:client) || Google::Cloud::Storage.new(opts)
 
         @name   = name.to_s
         @bucket = client.bucket(@name)
@@ -37,25 +39,31 @@ module BFS
 
       # Lists the contents of a bucket using a glob pattern
       def ls(pattern='**/*', opts={})
+        prefix = pattern[%r{^[^\*\?\{\}\[\]]+/}]
+        prefix = File.join(*[@prefix, prefix].compact) if @prefix
+        opts   = opts.merge(prefix: prefix) if prefix
+
         Enumerator.new do |y|
-          @bucket.files(opts).each do |file|
-            y << file.name if File.fnmatch?(pattern, file.name, File::FNM_PATHNAME)
+          @bucket.files(opts).all do |file|
+            name = trim_prefix(file.name)
+            y << name if File.fnmatch?(pattern, name, File::FNM_PATHNAME)
           end
         end
       end
 
       # Info returns the object info
       def info(path, _opts={})
-        path = norm_path(path)
+        path = full_path(path)
         file = @bucket.file(path)
-        raise BFS::FileNotFound, path unless file
+        raise BFS::FileNotFound, trim_prefix(path) unless file
 
-        BFS::FileInfo.new(path, file.size, file.updated_at, file.content_type, file.metadata)
+        name = trim_prefix(file.name)
+        BFS::FileInfo.new(name, file.size, file.updated_at.to_time, file.content_type, file.metadata)
       end
 
       # Creates a new file and opens it for writing
       def create(path, opts={}, &block)
-        path = norm_path(path)
+        path = full_path(path)
         temp = BFS::TempWriter.new(path) do |t|
           File.open(t, binmode: true) do |file|
             @bucket.create_file(file, path, opts)
@@ -72,9 +80,9 @@ module BFS
 
       # Opens an existing file for reading
       def open(path, opts={}, &block)
-        path = norm_path(path)
+        path = full_path(path)
         file = @bucket.file(path)
-        raise BFS::FileNotFound, path unless file
+        raise BFS::FileNotFound, trim_prefix(path) unless file
 
         temp = Tempfile.new(File.basename(path), binmode: true)
         temp.close
@@ -85,18 +93,18 @@ module BFS
 
       # Deletes a file.
       def rm(path, opts={})
-        path = norm_path(path)
+        path = full_path(path)
         file = @bucket.file(path)
         file.delete(opts) if file
       end
 
       # Copies a file.
       def cp(src, dst, opts={})
-        src  = norm_path(src)
+        src  = full_path(src)
         file = @bucket.file(src)
-        raise BFS::FileNotFound, src unless file
+        raise BFS::FileNotFound, trim_prefix(src) unless file
 
-        file.copy(norm_path(dst), opts)
+        file.copy(full_path(dst), opts)
       end
     end
   end

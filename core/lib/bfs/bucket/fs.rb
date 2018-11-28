@@ -78,13 +78,6 @@ module BFS
       rescue Errno::ENOENT
         raise BFS::FileNotFound, norm_path(src)
       end
-
-      private
-
-      def trim_prefix(path)
-        path.slice!(0, @prefix.size) if path.slice(0, @prefix.size) == @prefix
-        path
-      end
     end
   end
 end

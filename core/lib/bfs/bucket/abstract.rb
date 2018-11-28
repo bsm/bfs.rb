@@ -57,7 +57,18 @@ module BFS
       protected
 
       def norm_path(path)
-        BFS.norm_path(path)
+        BFS.norm_path(path) if path
+      end
+
+      def full_path(path)
+        path = norm_path(path)
+        path = File.join(@prefix, path) if @prefix
+        path
+      end
+
+      def trim_prefix(path)
+        path.slice!(0, @prefix.size) if @prefix && path.slice(0, @prefix.size) == @prefix
+        path
       end
     end
   end
