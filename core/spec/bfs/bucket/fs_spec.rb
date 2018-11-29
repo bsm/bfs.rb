@@ -5,7 +5,9 @@ RSpec.describe BFS::Bucket::FS do
   after   { FileUtils.rm_rf tmpdir }
   subject { described_class.new(tmpdir) }
 
-  it_behaves_like 'a bucket'
+  it_behaves_like 'a bucket',
+    content_type: false,
+    metadata: false
 
   it 'should resolve from URL' do
     File.open(File.join(tmpdir, 'test.txt'), 'wb') {|f| f.write 'TESTDATA' }

@@ -26,7 +26,6 @@ module BFS
           val = opts.delete(key)
           opts[key.to_sym] = val unless val.nil?
         end
-        opts[:project_id] ||= ENV['GCP_PROJECT'] || ENV['GCLOUD_PROJECT']
 
         @prefix = opts.delete(:prefix)
         acl     = opts.delete(:acl)
