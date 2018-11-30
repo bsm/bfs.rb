@@ -6,7 +6,7 @@ module Google::Auth::CredentialsLoader
   module_function :warn_if_cloud_sdk_credentials # rubocop:disable Style/AccessModifierDeclarations
 end
 
-sandbox  = { project: 'bsm-affiliates', bucket: 'bsm-bfs-unittest' }.freeze
+sandbox  = { project: 'bogus', bucket: 'bsm-bfs-unittest' }.freeze
 run_spec = \
   begin
     s = Google::Cloud::Storage.new(project_id: sandbox[:project])
