@@ -3,9 +3,11 @@ require 'uri'
 module BFS
   FileInfo = Struct.new(:path, :size, :mtime, :content_type, :metadata)
 
-  def self.register(scheme, &resolver)
+  def self.register(*schemes, &resolver)
     @registry ||= {}
-    @registry[scheme] = resolver
+    schemes.each do |scheme|
+      @registry[scheme] = resolver
+    end
   end
 
   def self.resolve(url)
