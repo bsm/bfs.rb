@@ -1,28 +1,28 @@
 PATH
   remote: core
   specs:
-    bfs (0.3.5)
+    bfs (0.3.6)
 
 PATH
   remote: ftp
   specs:
-    bfs-ftp (0.3.5)
-      bfs (= 0.3.5)
+    bfs-ftp (0.3.6)
+      bfs (= 0.3.6)
       net-ftp-list
 
 PATH
   remote: gs
   specs:
-    bfs-gs (0.3.5)
-      bfs (= 0.3.5)
+    bfs-gs (0.3.6)
+      bfs (= 0.3.6)
       google-cloud-storage
 
 PATH
   remote: s3
   specs:
-    bfs-s3 (0.3.5)
+    bfs-s3 (0.3.6)
       aws-sdk-s3
-      bfs (= 0.3.5)
+      bfs (= 0.3.6)
 
 GEM
   remote: https://rubygems.org/
