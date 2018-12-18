@@ -12,7 +12,7 @@ module BFS
       #
       # @param [String] name the bucket name.
       # @param [Hash] opts options.
-      # @option opts [String] :project_id project ID. Defaults to GCP_PROJECT  env var. Required.
+      # @option opts [String] :project_id project ID. Defaults to GCP_PROJECT env var. Required.
       # @option opts [String, Hash, Google::Auth::Credentials] :credentials
       #   the path to the keyfile as a String, the contents of the keyfile as a Hash, or a Google::Auth::Credentials object.
       # @option opts [String] :prefix custom namespace within the bucket
@@ -114,6 +114,7 @@ BFS.register('gs') do |url|
 
   BFS::Bucket::GS.new url.host,
     project_id: params.key?('project_id') ? params['project_id'].first : nil,
+    credentials: params.key?('credentials') ? params['credentials'].first : nil,
     acl: params.key?('acl') ? params['acl'].first : nil,
     timeout: params.key?('timeout') ? params['timeout'].first.to_i : nil,
     retries: params.key?('retries') ? params['retries'].first.to_i : nil
