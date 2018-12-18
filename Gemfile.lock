@@ -1,28 +1,28 @@
 PATH
   remote: core
   specs:
-    bfs (0.3.6)
+    bfs (0.3.7)
 
 PATH
   remote: ftp
   specs:
-    bfs-ftp (0.3.6)
-      bfs (= 0.3.6)
+    bfs-ftp (0.3.7)
+      bfs (= 0.3.7)
       net-ftp-list
 
 PATH
   remote: gs
   specs:
-    bfs-gs (0.3.6)
-      bfs (= 0.3.6)
+    bfs-gs (0.3.7)
+      bfs (= 0.3.7)
       google-cloud-storage
 
 PATH
   remote: s3
   specs:
-    bfs-s3 (0.3.6)
+    bfs-s3 (0.3.7)
       aws-sdk-s3
-      bfs (= 0.3.6)
+      bfs (= 0.3.7)
 
 GEM
   remote: https://rubygems.org/
@@ -142,4 +142,4 @@ DEPENDENCIES
   rubocop
 
 BUNDLED WITH
-   1.16.4
+   1.17.2
