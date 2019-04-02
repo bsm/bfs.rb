@@ -63,7 +63,7 @@ module BFS
       # Creates a new file and opens it for writing
       def create(path, opts={}, &block)
         path = full_path(path)
-        temp = BFS::TempWriter.new(path) do |t|
+        temp = BFS::TempWriter.new(path, encoding: opts.delete(:encoding)) do |t|
           File.open(t, binmode: true) do |file|
             @bucket.create_file(file, path, opts)
           end

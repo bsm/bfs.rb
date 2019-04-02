@@ -34,9 +34,17 @@ module BFS
         BFS::FileInfo.new(path, entry.io.size, entry.mtime, entry.content_type, entry.metadata)
       end
 
-      # Creates a new file and opens it for writing
+      # Creates a new file and opens it for writing.
+      #
+      # @param [String] path The creation path.
+      # @param [Hash] opts Additional options.
+      # @option opts [String] :encoding Custom encoding.
+      # @option opts [String] :content_type Custom content type.
+      # @option opts [Hash] :metadata Metadata key-value pairs.
       def create(path, opts={}, &block)
         io = StringIO.new
+        opts[:encoding] ? io.set_encoding(opts[:encoding]) : io.binmode
+
         @files[norm_path(path)] = Entry.new(io, Time.now, opts[:content_type], opts[:metadata] || {})
         return io unless block
 

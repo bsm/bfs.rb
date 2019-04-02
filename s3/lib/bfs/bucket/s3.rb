@@ -83,7 +83,7 @@ module BFS
         opts[:server_side_encryption] ||= @sse if @sse
         opts[:storage_class] ||= @storage_class if @storage_class
 
-        temp = BFS::TempWriter.new(path) do |t|
+        temp = BFS::TempWriter.new(path, opts) do |t|
           File.open(t, binmode: true) do |file|
             @client.put_object(opts.merge(body: file))
           end

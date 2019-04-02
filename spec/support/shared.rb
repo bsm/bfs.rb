@@ -45,7 +45,10 @@ RSpec.shared_examples 'a bucket' do |features={}|
     expect(subject.read('a/b.txt')).to eq('TESTDATA-b')
     expect(subject.read('/a/b.txt')).to eq('TESTDATA-b')
     subject.write('a/b.txt', 'NEWDATA')
-    expect(subject.read('a/b.txt')).to eq('NEWDATA')
+
+    data = subject.read('a/b.txt')
+    expect(data).to eq('NEWDATA')
+    expect(data.encoding).to eq(Encoding::BINARY)
   end
 
   it 'should write/read (block)' do
