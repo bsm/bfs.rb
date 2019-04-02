@@ -30,16 +30,26 @@ module BFS
       end
 
       # Shortcut method to read the contents of a file into memory
+      #
+      # @param [String] path The path to read from.
+      # @param [Hash] opts Additional options, see #open.
       def read(path, opts={})
         open(path, opts, &:read)
       end
 
       # Shortcut method to write data to path
+      #
+      # @param [String] path The path to write to.
+      # @param [String] data The data to write.
+      # @param [Hash] opts Additional options, see #create.
       def write(path, data, opts={})
         create(path, opts) {|f| f.write data }
       end
 
       # Copies src to dst
+      #
+      # @param [String] src The source path.
+      # @param [String] dst The destination path.
       def cp(src, dst, opts={})
         open(src, opts) do |r|
           create(dst, opts) do |w|
@@ -49,6 +59,9 @@ module BFS
       end
 
       # Moves src to dst
+      #
+      # @param [String] src The source path.
+      # @param [String] dst The destination path.
       def mv(src, dst, _opts={})
         cp(src, dst)
         rm(src)

@@ -30,11 +30,15 @@ module BFS
       end
 
       # Creates a new file and opens it for writing
-      def create(path, _opts={}, &block)
+      #
+      # @param [String] path The creation path.
+      # @param [Hash] opts Additional options.
+      # @option opts [String] :encoding Custom encoding.
+      def create(path, opts={}, &block)
         full = @root.join(norm_path(path))
         FileUtils.mkdir_p(full.dirname.to_s)
 
-        temp = BFS::TempWriter.new(full) {|t| FileUtils.mv t, full.to_s }
+        temp = BFS::TempWriter.new(full, opts) {|t| FileUtils.mv t, full.to_s }
         return temp unless block
 
         begin
@@ -45,6 +49,10 @@ module BFS
       end
 
       # Opens an existing file for reading
+      #
+      # @param [String] path The path to open.
+      # @param [Hash] opts Additional options.
+      # @option opts [String] :encoding Custom encoding.
       def open(path, opts={}, &block)
         path = norm_path(path)
         full = @root.join(path)
@@ -54,12 +62,17 @@ module BFS
       end
 
       # Deletes a file.
+      #
+      # @param [String] path The path to delete.
       def rm(path, _opts={})
         full = @root.join(norm_path(path))
         FileUtils.rm_f full.to_s
       end
 
       # Copies a file.
+      #
+      # @param [String] src The source path.
+      # @param [String] dst The destination path.
       def cp(src, dst, _opts={})
         full_src = @root.join(norm_path(src))
         full_dst = @root.join(norm_path(dst))
@@ -70,6 +83,9 @@ module BFS
       end
 
       # Moves a file.
+      #
+      # @param [String] src The source path.
+      # @param [String] dst The destination path.
       def mv(src, dst, _opts={})
         full_src = @root.join(norm_path(src))
         full_dst = @root.join(norm_path(dst))

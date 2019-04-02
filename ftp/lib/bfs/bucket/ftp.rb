@@ -53,9 +53,9 @@ module BFS
       end
 
       # Creates a new file and opens it for writing
-      def create(path, _opts={}, &block)
+      def create(path, opts={}, &block)
         path = norm_path(path)
-        temp = BFS::TempWriter.new(path) do |t|
+        temp = BFS::TempWriter.new(path, opts) do |t|
           mkdir_p File.dirname(path)
           @client.put(t, path)
         end
