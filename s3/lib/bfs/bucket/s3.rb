@@ -6,8 +6,6 @@ module BFS
   module Bucket
     # S3 buckets are operating on s3
     class S3 < Abstract
-      NF_ERRORS = [Aws::S3::Errors::NoSuchKey, Aws::S3::Errors::NoSuchBucket, Aws::S3::Errors::NotFound].freeze
-
       attr_reader :name, :sse, :acl, :storage_class
 
       # Initializes a new S3 bucket
@@ -68,7 +66,7 @@ module BFS
         raise BFS::FileNotFound, path unless info
 
         BFS::FileInfo.new(path, info.content_length, info.last_modified, info.content_type, info.metadata)
-      rescue *NF_ERRORS
+      rescue Aws::S3::Errors::NoSuchKey, Aws::S3::Errors::NoSuchBucket, Aws::S3::Errors::NotFound
         raise BFS::FileNotFound, path
       end
 
@@ -111,7 +109,7 @@ module BFS
         @client.get_object(opts)
 
         File.open(temp.path, binmode: true, &block)
-      rescue *NF_ERRORS
+      rescue Aws::S3::Errors::NoSuchKey, Aws::S3::Errors::NoSuchBucket, Aws::S3::Errors::NotFound
         raise BFS::FileNotFound, trim_prefix(path)
       end
 
@@ -123,7 +121,7 @@ module BFS
           key: path,
         )
         @client.delete_object(opts)
-      rescue *NF_ERRORS # rubocop:disable Lint/HandleExceptions
+      rescue Aws::S3::Errors::NoSuchKey, Aws::S3::Errors::NoSuchBucket, Aws::S3::Errors::NotFound # rubocop:disable Lint/HandleExceptions
       end
 
       # Copies a file.
@@ -136,7 +134,7 @@ module BFS
           key: dst,
         )
         @client.copy_object(opts)
-      rescue *NF_ERRORS
+      rescue Aws::S3::Errors::NoSuchKey, Aws::S3::Errors::NoSuchBucket, Aws::S3::Errors::NotFound
         raise BFS::FileNotFound, trim_prefix(src)
       end
 
