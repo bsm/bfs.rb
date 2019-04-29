@@ -29,9 +29,15 @@ RSpec.describe BFS::Bucket::GS, if: run_spec do
   it_behaves_like 'a bucket'
 
   it 'should resolve from URL' do
-    bucket = BFS.resolve("gs://#{sandbox[:bucket]}?acl=private&project_id=#{sandbox[:project]}")
+    bucket = BFS.resolve("gs://#{sandbox[:bucket]}/?acl=private&project_id=#{sandbox[:project]}")
     expect(bucket).to be_instance_of(described_class)
     expect(bucket.name).to eq(sandbox[:bucket])
+    expect(bucket.instance_variable_get(:@prefix)).to be_nil
+
+    bucket = BFS.resolve("gs://#{sandbox[:bucket]}/a/b/")
+    expect(bucket).to be_instance_of(described_class)
+    expect(bucket.name).to eq(sandbox[:bucket])
+    expect(bucket.instance_variable_get(:@prefix)).to eq('a/b')
   end
 
   it 'should enumerate over a large number of files' do

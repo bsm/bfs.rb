@@ -157,8 +157,11 @@ end
 
 BFS.register('s3') do |url|
   params = CGI.parse(url.query.to_s)
+  prefix = BFS.norm_path(params.key?('prefix') ? params['prefix'].first : url.path)
+  prefix = nil if prefix.empty?
 
   BFS::Bucket::S3.new url.host,
+    prefix: prefix,
     region: params.key?('region') ? params['region'].first : nil,
     sse: params.key?('sse') ? params['sse'].first : nil,
     access_key_id: params.key?('access_key_id') ? params['access_key_id'].first : nil,
