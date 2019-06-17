@@ -20,12 +20,14 @@ module BFS
       # @option opts [Integer] :timeout request timeout, in seconds.
       # @option opts [String] :acl set the default ACL.
       # @option opts [Google::Cloud::Storage] :client custom client.
+      # @option opts [String] :encoding default encoding to use, default: 'binary'
       def initialize(name, opts={})
         opts = opts.dup
         opts.keys.each do |key|
           val = opts.delete(key)
           opts[key.to_sym] = val unless val.nil?
         end
+        super(opts)
 
         @prefix = opts.delete(:prefix)
         acl     = opts.delete(:acl)
@@ -63,8 +65,9 @@ module BFS
       # Creates a new file and opens it for writing
       def create(path, opts={}, &block)
         path = full_path(path)
-        temp = BFS::TempWriter.new(path, encoding: opts.delete(:encoding)) do |t|
-          File.open(t, binmode: true) do |file|
+        enc  = opts.delete(:encoding) || @encoding
+        temp = BFS::TempWriter.new(path, encoding: enc) do |t|
+          File.open(t, encoding: enc) do |file|
             @bucket.create_file(file, path, opts)
           end
         end
@@ -80,21 +83,22 @@ module BFS
       # Opens an existing file for reading
       def open(path, opts={}, &block)
         path = full_path(path)
+        enc  = opts.delete(:encoding) || @encoding
         file = @bucket.file(path)
         raise BFS::FileNotFound, trim_prefix(path) unless file
 
-        temp = Tempfile.new(File.basename(path), binmode: true)
+        temp = Tempfile.new(File.basename(path), encoding: enc)
         temp.close
         file.download temp.path, opts
 
-        File.open(temp.path, binmode: true, &block)
+        File.open(temp.path, encoding: enc, &block)
       end
 
       # Deletes a file.
       def rm(path, opts={})
         path = full_path(path)
         file = @bucket.file(path)
-        file.delete(opts) if file
+        file&.delete(opts)
       end
 
       # Copies a file.

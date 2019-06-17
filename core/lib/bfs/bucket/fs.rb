@@ -6,7 +6,9 @@ module BFS
   module Bucket
     # FS buckets are operating on the file system
     class FS < Abstract
-      def initialize(root, _opts={})
+      def initialize(root, opts={})
+        super(opts.dup)
+
         @root = Pathname.new(root.to_s)
         @prefix = "#{@root.to_s.chomp('/')}/"
       end
@@ -38,7 +40,8 @@ module BFS
         full = @root.join(norm_path(path))
         FileUtils.mkdir_p(full.dirname.to_s)
 
-        temp = BFS::TempWriter.new(full, opts) {|t| FileUtils.mv t, full.to_s }
+        enc  = opts[:encoding] || @encoding
+        temp = BFS::TempWriter.new(full, encoding: enc) {|t| FileUtils.mv t, full.to_s }
         return temp unless block
 
         begin

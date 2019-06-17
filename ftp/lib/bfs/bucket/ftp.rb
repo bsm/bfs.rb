@@ -22,6 +22,7 @@ module BFS
           val = opts.delete(key)
           opts[key.to_sym] = val unless val.nil?
         end
+        super(opts)
 
         prefix  = opts.delete(:prefix)
         @client = Net::FTP.new(host, opts)
@@ -36,7 +37,7 @@ module BFS
       # Lists the contents of a bucket using a glob pattern
       def ls(pattern='**/*', _opts={})
         root = pattern[%r{^[^\*\?\{\}\[\]]+/}]
-        root.chomp!('/') if root
+        root&.chomp!('/')
         Enumerator.new do |y|
           glob(root) do |path|
             y << path if File.fnmatch?(pattern, path, File::FNM_PATHNAME)
@@ -55,7 +56,8 @@ module BFS
       # Creates a new file and opens it for writing
       def create(path, opts={}, &block)
         path = norm_path(path)
-        temp = BFS::TempWriter.new(path, opts) do |t|
+        enc  = opts.delete(:encoding) || @encoding
+        temp = BFS::TempWriter.new(path, encoding: enc) do |t|
           mkdir_p File.dirname(path)
           @client.put(t, path)
         end
@@ -69,13 +71,14 @@ module BFS
       end
 
       # Opens an existing file for reading
-      def open(path, _opts={}, &block)
+      def open(path, opts={}, &block)
         path = norm_path(path)
-        temp = Tempfile.new(File.basename(path), binmode: true)
+        enc  = opts.delete(:encoding) || @encoding
+        temp = Tempfile.new(File.basename(path), encoding: enc)
         temp.close
 
         @client.get(path, temp.path)
-        File.open(temp.path, 'rb', &block)
+        File.open(temp.path, encoding: enc, &block)
       rescue Net::FTPPermError
         raise BFS::FileNotFound, path
       end

@@ -7,7 +7,8 @@ module BFS
     class InMem < Abstract
       Entry = Struct.new(:io, :mtime, :content_type, :metadata)
 
-      def initialize
+      def initialize(opts={})
+        super(opts.dup)
         @files = {}
       end
 
@@ -43,7 +44,7 @@ module BFS
       # @option opts [Hash] :metadata Metadata key-value pairs.
       def create(path, opts={}, &block)
         io = StringIO.new
-        opts[:encoding] ? io.set_encoding(opts[:encoding]) : io.binmode
+        io.set_encoding(opts[:encoding] || @encoding)
 
         @files[norm_path(path)] = Entry.new(io, Time.now, opts[:content_type], opts[:metadata] || {})
         return io unless block
