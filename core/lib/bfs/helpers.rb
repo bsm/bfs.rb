@@ -24,7 +24,7 @@ module BFS
 
       path = @tempfile.path
       @tempfile.close
-      @closer.call(path) if @closer
+      @closer&.call(path)
       @tempfile.unlink
     end
   end

@@ -98,7 +98,7 @@ module BFS
       def rm(path, opts={})
         path = full_path(path)
         file = @bucket.file(path)
-        file.delete(opts) if file
+        file&.delete(opts)
       end
 
       # Copies a file.

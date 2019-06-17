@@ -37,7 +37,7 @@ module BFS
       # Lists the contents of a bucket using a glob pattern
       def ls(pattern='**/*', _opts={})
         root = pattern[%r{^[^\*\?\{\}\[\]]+/}]
-        root.chomp!('/') if root
+        root&.chomp!('/')
         Enumerator.new do |y|
           glob(root) do |path|
             y << path if File.fnmatch?(pattern, path, File::FNM_PATHNAME)
