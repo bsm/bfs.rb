@@ -68,6 +68,18 @@ RSpec.shared_examples 'a bucket' do |features={}|
     r.close
   end
 
+  it 'should write/read (custom encoding)' do
+    w = subject.create('y.txt', encoding: 'utf-8')
+    w.write('DATA-y')
+    w.close
+
+    r = subject.open('y.txt', encoding: 'utf-8')
+    data = r.read
+    expect(data).to eq('DATA-y')
+    expect(data.encoding).to eq(Encoding::UTF_8)
+    r.close
+  end
+
   it 'should raise FileNotFound if not foudn on read' do
     expect { subject.read('not/found.txt') }.to raise_error(BFS::FileNotFound)
   end

@@ -3,8 +3,6 @@ require 'tempfile'
 module BFS
   class TempWriter
     def initialize(name, opts={}, &closer)
-      opts = opts.merge(binmode: true) unless opts[:encoding]
-
       @closer = closer
       @tempfile = ::Tempfile.new(File.basename(name.to_s), opts)
     end

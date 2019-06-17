@@ -18,5 +18,5 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.2.0'
 
   s.add_dependency 'bfs', s.version
-  s.add_dependency 'google-cloud-storage'
+  s.add_dependency 'google-cloud-storage', '~> 1.18'
 end

@@ -3,6 +3,13 @@ require 'bfs'
 module BFS
   module Bucket
     class Abstract
+      # Initializes a new bucket
+      # @param [Hash] opts options
+      # @option opts [String] :encoding default encoding, default: binary.
+      def initialize(opts={})
+        @encoding = opts.delete(:encoding) || Encoding::BINARY
+      end
+
       # Lists the contents of a bucket using a glob pattern
       def ls(_pattern='**', _opts={})
         raise 'not implemented'
