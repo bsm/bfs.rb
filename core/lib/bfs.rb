@@ -22,6 +22,7 @@ module BFS
     path = path.to_s.dup
     path.gsub!(File::SEPARATOR, '/')
     path.sub!(%r{^/+}, '')
+    path.sub!(%r{/+$}, '')
     path
   end
 end
