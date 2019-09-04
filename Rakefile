@@ -3,7 +3,7 @@ require 'rspec/core/rake_task'
 require 'rubocop/rake_task'
 require 'bundler/gem_helper'
 
-PACKAGES = %w[core gs s3].freeze
+PACKAGES = Dir['*/*.gemspec'].map {|fn| File.dirname(fn) }.freeze
 
 RSpec::Core::RakeTask.new(:spec) do |t|
   t.pattern = '*/spec/**{,/*/**}/*_spec.rb'
