@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-sandbox  = { host: '127.0.0.1', opts: { port: 7022, user: 'root', password: 'root' }}.freeze
+sandbox  = { host: '127.0.0.1', opts: { port: 7022, user: 'root', password: 'root' } }.freeze
 run_spec = \
   begin
     Net::SCP.start sandbox[:host], nil, sandbox[:opts].merge(timeout: 1) do |scp|

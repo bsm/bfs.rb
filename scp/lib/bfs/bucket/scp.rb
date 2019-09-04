@@ -8,11 +8,11 @@ module BFS
     # SCP buckets are operating on SCP/SSH connections.
     class SCP < Abstract
       class CommandError < RuntimeError
-        attr_reader :code
+        attr_reader :status
 
-        def initialize(cmd, code)
-          @code = code
-          super "Command #{cmd} exited with #{code}"
+        def initialize(cmd, status, extra=nil)
+          @status = status
+          super ["Command '#{cmd}' exited with status #{status}", extra].join(': ')
         end
       end
 
@@ -39,7 +39,7 @@ module BFS
         @prefix = opts.delete(:prefix)
         @client = Net::SCP.start(host, nil, opts)
 
-        if @prefix
+        if @prefix # rubocop:disable Style/GuardClause
           @prefix = norm_path(@prefix) + '/'
           mkdir_p(@prefix)
         end
@@ -67,7 +67,7 @@ module BFS
         size, epoch = out.strip.split(';', 2).map(&:to_i)
         BFS::FileInfo.new(path, size, Time.at(epoch))
       rescue CommandError => e
-        e.code == 1 ? raise(BFS::FileNotFound, path) : raise
+        e.status == 1 ? raise(BFS::FileNotFound, path) : raise
       end
 
       # Creates a new file and opens it for writing
@@ -117,7 +117,7 @@ module BFS
         mkdir_p File.dirname(full_dst)
         sh! 'cp', '-a', '-f', full_src, full_dst
       rescue CommandError => e
-        e.code == 1 ? raise(BFS::FileNotFound, src) : raise
+        e.status == 1 ? raise(BFS::FileNotFound, src) : raise
       end
 
       # Moves src to dst
@@ -131,7 +131,7 @@ module BFS
         mkdir_p File.dirname(full_dst)
         sh! 'mv', '-f', full_src, full_dst
       rescue CommandError => e
-        e.code == 1 ? raise(BFS::FileNotFound, src) : raise
+        e.status == 1 ? raise(BFS::FileNotFound, src) : raise
       end
 
       # Closes the underlying connection
@@ -145,13 +145,14 @@ module BFS
         sh! 'mkdir', '-p', path
       end
 
-      def sh!(*cmd)
-        stdout = ""
+      def sh!(*cmd) # rubocop:disable Metrics/MethodLength
+        stdout = ''
+        stderr = nil
         status = 0
         cmdstr = cmd.map {|x| Shellwords.escape(x) }.join(' ')
 
         @client.session.open_channel do |ch|
-          ch.exec(cmdstr) do |_, success|
+          ch.exec(cmdstr) do |_, _success|
             ch.on_data do |_, data|
               if block_given?
                 yield data
@@ -159,14 +160,17 @@ module BFS
                 stdout += data
               end
             end
-            ch.on_request("exit-status") do |_, data|
-              status = data.read_long
+            ch.on_extended_data do |_, _, data|
+              stderr = data
+            end
+            ch.on_request('exit-status') do |_, buf|
+              status = buf.read_long
             end
           end
         end
         @client.session.loop
+        raise CommandError.new(cmdstr, status, stderr) unless status.zero?
 
-        raise CommandError.new(cmdstr, status) unless status.zero?
         stdout
       end
     end

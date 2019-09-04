@@ -28,7 +28,7 @@ module BFS
         @client = Net::FTP.new(host, opts)
         @client.binary = true
 
-        if prefix
+        if prefix # rubocop:disable Style/GuardClause
           prefix = norm_path(prefix)
           mkdir_p(prefix)
           @client.chdir(prefix)
@@ -100,7 +100,7 @@ module BFS
       private
 
       def glob(dir, &block)
-        @client.ls(dir || '.')  do |e|
+        @client.ls(dir || '.') do |e|
           entry = Net::FTP::List.parse(e)
           if entry.dir?
             subdir = [dir, entry.basename].compact.join('/')
