@@ -27,19 +27,21 @@ module BFS
         prefix  = opts.delete(:prefix)
         @client = Net::FTP.new(host, opts)
         @client.binary = true
-        return unless prefix
 
-        prefix = norm_path(prefix)
-        mkdir_p(prefix)
-        @client.chdir(prefix)
+        if prefix # rubocop:disable Style/GuardClause
+          prefix = norm_path(prefix)
+          mkdir_p(prefix)
+          @client.chdir(prefix)
+        end
       end
 
       # Lists the contents of a bucket using a glob pattern
       def ls(pattern='**/*', _opts={})
-        root = pattern[%r{^[^\*\?\{\}\[\]]+/}]
-        root&.chomp!('/')
+        dir = pattern[%r{^[^\*\?\{\}\[\]]+/}]
+        dir&.chomp!('/')
+
         Enumerator.new do |y|
-          glob(root) do |path|
+          glob(dir) do |path|
             y << path if File.fnmatch?(pattern, path, File::FNM_PATHNAME)
           end
         end
@@ -97,14 +99,14 @@ module BFS
 
       private
 
-      def glob(root, &block)
-        @client.ls [root, '*'].compact.join('/') do |e|
+      def glob(dir, &block)
+        @client.ls(dir || '.') do |e|
           entry = Net::FTP::List.parse(e)
           if entry.dir?
-            newroot = [root, entry.basename].compact.join('/')
-            glob newroot, &block
+            subdir = [dir, entry.basename].compact.join('/')
+            glob subdir, &block
           elsif entry.file?
-            yield [root, entry.basename].compact.join('/')
+            yield [dir, entry.basename].compact.join('/')
           end
         end
       end
@@ -126,8 +128,8 @@ BFS.register('ftp', 'sftp') do |url|
   params = CGI.parse(url.query.to_s)
 
   BFS::Bucket::FTP.new url.host,
-    username: url.user,
-    password: url.password,
+    username: url.user ? CGI.unescape(url.user) : nil,
+    password: url.password ? CGI.unescape(url.password) : nil,
     port: url.port,
     ssl: params.key?('ssl') || url.scheme == 'sftp',
     prefix: params.key?('prefix') ? params['prefix'].first : nil

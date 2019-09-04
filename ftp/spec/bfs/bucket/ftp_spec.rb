@@ -6,8 +6,8 @@ run_spec = \
     ftp = Net::FTP.new sandbox[:host], sandbox
     ftp.list
     ftp.close
-    true
-  rescue Errno::ECONNREFUSED, Net::FTPError
+  rescue Errno::ECONNREFUSED, Net::FTPError => e
+    warn "WARNING: unable to run #{File.basename __FILE__}: #{e.message}"
     false
   end
 

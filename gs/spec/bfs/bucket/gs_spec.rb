@@ -11,7 +11,8 @@ run_spec = \
   begin
     s = Google::Cloud::Storage.new(project_id: sandbox[:project])
     !s.bucket(sandbox[:bucket]).nil?
-  rescue Signet::AuthorizationError
+  rescue Signet::AuthorizationError => e
+    warn "WARNING: unable to run #{File.basename __FILE__}: #{e.message}"
     false
   end
 

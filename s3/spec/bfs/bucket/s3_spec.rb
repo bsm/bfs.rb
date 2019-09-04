@@ -6,7 +6,8 @@ run_spec = \
     s = Aws::S3::Client.new
     s.head_bucket(bucket: sandbox[:bucket])
     true
-  rescue StandardError
+  rescue StandardError => e
+    warn "WARNING: unable to run #{File.basename __FILE__}: #{e.message}"
     false
   end
 
