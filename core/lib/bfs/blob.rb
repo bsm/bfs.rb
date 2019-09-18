@@ -4,7 +4,7 @@ module BFS
     attr_reader :path
 
     def initialize(url)
-      url = URI.parse(url) unless url.is_a?(::URI)
+      url = url.is_a?(::URI) ? url.dup : URI.parse(url)
       @path = BFS.norm_path(url.path)
 
       url.path = '/'

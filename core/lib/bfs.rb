@@ -11,7 +11,7 @@ module BFS
   end
 
   def self.resolve(url)
-    url = URI.parse(url) unless url.is_a?(::URI)
+    url = url.is_a?(::URI) ? url.dup : URI.parse(url)
     rsl = @registry[url.scheme]
     raise ArgumentError, "Unable to resolve #{url}, scheme #{url.scheme} is not registered" unless rsl
 
