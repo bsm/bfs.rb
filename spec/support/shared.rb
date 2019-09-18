@@ -33,7 +33,7 @@ RSpec.shared_examples 'a bucket' do |features={}|
     info = subject.info('/a/b/c.txt')
     expect(info.path).to eq('a/b/c.txt')
     expect(info.size).to eq(10)
-    expect(info.mtime).to be_within(2).of(Time.now)
+    expect(info.mtime).to be_within(30).of(Time.now)
 
     expect(info.content_type).to eq('text/plain') unless features[:content_type] == false
     expect(info.metadata).to eq('meta-key' => 'value') unless features[:metadata] == false
