@@ -5,6 +5,7 @@ RSpec.describe BFS::Blob do
     let(:bucket) { BFS::Bucket::InMem.new }
     before       { allow(BFS).to receive(:resolve).and_return(bucket) }
     subject      { described_class.new('memtest://bucket/path/to/file.txt') }
+    after        { subject.close }
 
     it 'should move' do
       expect(subject.path).to eq('path/to/file.txt')

@@ -1,34 +1,34 @@
 PATH
   remote: core
   specs:
-    bfs (0.4.2)
+    bfs (0.4.3)
 
 PATH
   remote: ftp
   specs:
-    bfs-ftp (0.4.2)
-      bfs (= 0.4.2)
+    bfs-ftp (0.4.3)
+      bfs (= 0.4.3)
       net-ftp-list
 
 PATH
   remote: gs
   specs:
-    bfs-gs (0.4.2)
-      bfs (= 0.4.2)
+    bfs-gs (0.4.3)
+      bfs (= 0.4.3)
       google-cloud-storage (~> 1.18)
 
 PATH
   remote: s3
   specs:
-    bfs-s3 (0.4.2)
+    bfs-s3 (0.4.3)
       aws-sdk-s3 (~> 1.38)
-      bfs (= 0.4.2)
+      bfs (= 0.4.3)
 
 PATH
   remote: scp
   specs:
-    bfs-scp (0.4.2)
-      bfs (= 0.4.2)
+    bfs-scp (0.4.3)
+      bfs (= 0.4.3)
       net-scp
 
 GEM
@@ -38,7 +38,7 @@ GEM
       public_suffix (>= 2.0.2, < 5.0)
     ast (2.4.0)
     aws-eventstream (1.0.3)
-    aws-partitions (1.214.0)
+    aws-partitions (1.215.0)
     aws-sdk-core (3.68.0)
       aws-eventstream (~> 1.0, >= 1.0.2)
       aws-partitions (~> 1.0)

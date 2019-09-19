@@ -7,7 +7,7 @@ run_spec = \
       scp.session.exec!('hostname')
     end
     true
-  rescue Net::SSH::Exception => e
+  rescue Net::SSH::Exception, Errno::ECONNREFUSED => e
     warn "WARNING: unable to run #{File.basename __FILE__}: #{e.message}"
     false
   end
