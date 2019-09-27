@@ -1,22 +1,12 @@
 require 'tempfile'
+require 'delegate'
 
 module BFS
-  class TempWriter
+  class TempWriter < DelegateClass(::Tempfile)
     def initialize(name, opts={}, &closer)
-      @closer = closer
+      @closer   = closer
       @tempfile = ::Tempfile.new(File.basename(name.to_s), opts)
-    end
-
-    def path
-      @tempfile.path
-    end
-
-    def write(data)
-      @tempfile.write(data)
-    end
-
-    def closed?
-      @tempfile.closed?
+      super @tempfile
     end
 
     def close
