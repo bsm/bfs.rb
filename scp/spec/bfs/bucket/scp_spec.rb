@@ -13,15 +13,36 @@ run_spec = \
   end
 
 RSpec.describe BFS::Bucket::SCP, if: run_spec do
-  subject { described_class.new sandbox[:host], sandbox[:opts].merge(prefix: SecureRandom.uuid) }
-  after   { subject.close }
+  context 'absolute' do
+    subject { described_class.new sandbox[:host], sandbox[:opts].merge(prefix: SecureRandom.uuid) }
+    after   { subject.close }
 
-  it_behaves_like 'a bucket',
-    content_type: false,
-    metadata: false
+    it_behaves_like 'a bucket', content_type: false, metadata: false
+  end
+
+  context 'relative' do
+    subject { described_class.new sandbox[:host], sandbox[:opts].merge(prefix: "~/#{SecureRandom.uuid}") }
+    after   { subject.close }
+
+    it_behaves_like 'a bucket', content_type: false, metadata: false
+  end
 
   it 'should resolve from URL' do
     bucket = BFS.resolve('scp://root:root@127.0.0.1:7022')
     expect(bucket).to be_instance_of(described_class)
+  end
+
+  it 'should handle absolute and relative paths' do
+    abs = BFS::Blob.new("scp://root:root@127.0.0.1:7022/#{SecureRandom.uuid}/file.txt")
+    abs.create {|w| w.write 'absolute' }
+
+    rel = BFS::Blob.new("scp://root:root@127.0.0.1:7022/~/#{SecureRandom.uuid}/file.txt")
+    rel.create {|w| w.write 'relative' }
+
+    expect(abs.read).to eq('absolute')
+    expect(rel.read).to eq('relative')
+
+    abs.close
+    rel.close
   end
 end
