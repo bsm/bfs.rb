@@ -59,11 +59,12 @@ module BFS
         raise BFS::FileNotFound, trim_prefix(path) unless file
 
         name = trim_prefix(file.name)
-        BFS::FileInfo.new(name, file.size, file.updated_at.to_time, file.content_type, file.metadata)
+        BFS::FileInfo.new(name, file.size, file.updated_at.to_time, file.content_type, norm_meta(file.metadata))
       end
 
       # Creates a new file and opens it for writing
       def create(path, opts={}, &block)
+        opts[:metadata] = norm_meta(opts[:metadata])
         path = full_path(path)
         enc  = opts.delete(:encoding) || @encoding
         temp = BFS::TempWriter.new(path, encoding: enc) do |t|
