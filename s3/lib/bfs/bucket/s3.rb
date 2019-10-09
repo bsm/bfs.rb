@@ -67,7 +67,7 @@ module BFS
         info = @client.head_object(opts)
         raise BFS::FileNotFound, path unless info
 
-        BFS::FileInfo.new(path, info.content_length, info.last_modified, info.content_type, info.metadata)
+        BFS::FileInfo.new(path, info.content_length, info.last_modified, info.content_type, norm_meta(info.metadata))
       rescue Aws::S3::Errors::NoSuchKey, Aws::S3::Errors::NoSuchBucket, Aws::S3::Errors::NotFound
         raise BFS::FileNotFound, path
       end

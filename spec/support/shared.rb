@@ -3,7 +3,7 @@ RSpec.shared_examples 'a bucket' do |features={}|
     subject.write '/a/b.txt', 'TESTDATA-b'
     subject.write 'a/b/c.txt', 'TESTDATA-c',
       content_type: 'text/plain',
-      metadata: { 'meta-key' => 'value' }
+      metadata: { 'meta-KEY' => 'VaLuE' }
     subject.write 'a/b/c/d.txt', 'TESTDATA-d'
     subject.write 'a/b/c/d/e.txt', 'TESTDATA-e'
   end
@@ -36,7 +36,7 @@ RSpec.shared_examples 'a bucket' do |features={}|
     expect(info.mtime).to be_within(30).of(Time.now)
 
     expect(info.content_type).to eq('text/plain') unless features[:content_type] == false
-    expect(info.metadata).to eq('meta-key' => 'value') unless features[:metadata] == false
+    expect(info.metadata).to eq('Meta-Key' => 'VaLuE') unless features[:metadata] == false
 
     expect { subject.info('missing.txt') }.to raise_error(BFS::FileNotFound)
   end

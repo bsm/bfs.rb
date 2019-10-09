@@ -46,7 +46,7 @@ module BFS
         io = StringIO.new
         io.set_encoding(opts[:encoding] || @encoding)
 
-        @files[norm_path(path)] = Entry.new(io, Time.now, opts[:content_type], opts[:metadata] || {})
+        @files[norm_path(path)] = Entry.new(io, Time.now, opts[:content_type], norm_meta(opts[:metadata]))
         return io unless block
 
         begin
