@@ -142,7 +142,7 @@ module BFS
       private
 
       def abs_path(path)
-        path = "/#{path}" unless path.start_with?('~/') || path.start_with?('./')
+        path = "/#{path}" unless path.start_with?('~/', './')
         path
       end
 
