@@ -41,17 +41,17 @@ module BFS
 
         if @prefix # rubocop:disable Style/GuardClause
           @prefix = norm_path(@prefix) + '/'
-          mkdir_p(@prefix)
+          mkdir_p abs_path(@prefix)
         end
       end
 
       # Lists the contents of a bucket using a glob pattern
       def ls(pattern='**/*', _opts={})
-        prefix = @prefix || '.'
+        prefix = @prefix ? abs_path(@prefix) : '/'
         Enumerator.new do |y|
           sh! 'find', prefix, '-type', 'f' do |out|
             out.each_line do |line|
-              path = trim_prefix(line.strip)
+              path = trim_prefix(norm_path(line.strip))
               y << path if File.fnmatch?(pattern, path, File::FNM_PATHNAME)
             end
           end
@@ -140,6 +140,15 @@ module BFS
       end
 
       private
+
+      def abs_path(path)
+        path = "/#{path}" unless path.start_with?('~/') || path.start_with?('./')
+        path
+      end
+
+      def full_path(*)
+        abs_path(super)
+      end
 
       def mkdir_p(path)
         sh! 'mkdir', '-p', path
