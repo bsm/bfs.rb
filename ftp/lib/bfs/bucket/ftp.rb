@@ -89,7 +89,7 @@ module BFS
       def rm(path, _opts={})
         path = norm_path(path)
         @client.delete(path)
-      rescue Net::FTPPermError # rubocop:disable Lint/HandleExceptions
+      rescue Net::FTPPermError # rubocop:disable Lint/SuppressedException
       end
 
       # Closes the underlying connection
@@ -116,7 +116,7 @@ module BFS
         (0...parts.size).each do |i|
           begin
             @client.mkdir parts[0..i].join('/')
-          rescue Net::FTPPermError # rubocop:disable Lint/HandleExceptions
+          rescue Net::FTPPermError # rubocop:disable Lint/SuppressedException
           end
         end
       end

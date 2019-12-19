@@ -20,7 +20,7 @@ module BFS
       # @option opts [Integer] :timeout request timeout, in seconds.
       # @option opts [String] :acl set the default ACL.
       # @option opts [Google::Cloud::Storage] :client custom client.
-      # @option opts [String] :encoding default encoding to use, default: 'binary'
+      # @option opts [String] :encoding Custom encoding.
       def initialize(name, opts={})
         opts = opts.dup
         opts.keys.each do |key|

@@ -48,7 +48,7 @@ RSpec.shared_examples 'a bucket' do |features={}|
 
     data = subject.read('a/b.txt')
     expect(data).to eq('NEWDATA')
-    expect(data.encoding).to eq(Encoding::BINARY)
+    expect(data.encoding).to eq(Encoding.default_external)
   end
 
   it 'should write/read (block)' do
@@ -69,14 +69,14 @@ RSpec.shared_examples 'a bucket' do |features={}|
   end
 
   it 'should write/read (custom encoding)' do
-    w = subject.create('y.txt', encoding: 'utf-8')
+    w = subject.create('y.txt', encoding: 'iso-8859-15')
     w.write('DATA-y')
     w.close
 
-    r = subject.open('y.txt', encoding: 'utf-8')
+    r = subject.open('y.txt', encoding: 'iso-8859-15')
     data = r.read
     expect(data).to eq('DATA-y')
-    expect(data.encoding).to eq(Encoding::UTF_8)
+    expect(data.encoding).to eq(Encoding::ISO_8859_15)
     r.close
   end
 

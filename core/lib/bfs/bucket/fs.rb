@@ -59,7 +59,7 @@ module BFS
       def open(path, opts={}, &block)
         path = norm_path(path)
         full = @root.join(path)
-        full.open('rb', opts, &block)
+        full.open(opts, &block)
       rescue Errno::ENOENT
         raise BFS::FileNotFound, path
       end

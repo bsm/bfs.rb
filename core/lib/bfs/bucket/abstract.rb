@@ -5,9 +5,9 @@ module BFS
     class Abstract
       # Initializes a new bucket
       # @param [Hash] opts options
-      # @option opts [String] :encoding default encoding, default: binary.
+      # @option opts [String] :encoding Custom encoding. Default: Encoding.default_external.
       def initialize(opts={})
-        @encoding = opts.delete(:encoding) || Encoding::BINARY
+        @encoding = opts.delete(:encoding) || Encoding.default_external
       end
 
       # Lists the contents of a bucket using a glob pattern

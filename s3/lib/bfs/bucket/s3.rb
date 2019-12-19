@@ -21,7 +21,7 @@ module BFS
       # @option opts [Symbol] :acl canned ACL
       # @option opts [String] :storage_class storage class
       # @option opts [Aws::S3::Client] :client custom client, uses default_client by default
-      # @option opts [String] :encoding default encoding to use, default: 'binary'
+      # @option opts [String] :encoding Custom encoding.
       def initialize(name, opts={})
         opts = opts.dup
         opts.keys.each do |key|
@@ -75,7 +75,7 @@ module BFS
       # Creates a new file and opens it for writing
       # @param [String] path
       # @param [Hash] opts options
-      # @option opts [String] :encoding file encoding to use, default: 'binary'
+      # @option opts [String] :encoding Custom encoding.
       # @option opts [String] :acl custom ACL override
       # @option opts [String] :server_side_encryption SSE override
       # @option opts [String] :storage_class storage class override
@@ -107,7 +107,7 @@ module BFS
       # Opens an existing file for reading
       # @param [String] path
       # @param [Hash] opts options
-      # @option opts [String] :encoding file encoding to use, default: 'binary'
+      # @option opts [String] :encoding Custom encoding.
       def open(path, opts={}, &block)
         path = full_path(path)
         enc  = opts.delete(:encoding) || @encoding
@@ -134,7 +134,7 @@ module BFS
           key: path,
         )
         @client.delete_object(opts)
-      rescue Aws::S3::Errors::NoSuchKey, Aws::S3::Errors::NoSuchBucket, Aws::S3::Errors::NotFound # rubocop:disable Lint/HandleExceptions
+      rescue Aws::S3::Errors::NoSuchKey, Aws::S3::Errors::NoSuchBucket, Aws::S3::Errors::NotFound # rubocop:disable Lint/SuppressedException
       end
 
       # Copies a file.
