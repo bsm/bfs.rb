@@ -6,7 +6,6 @@ module BFS
   module Bucket
     # FTP buckets are operating on ftp servers
     class FTP < Abstract
-
       # Initializes a new bucket
       # @param [String] host the host name
       # @param [Hash] opts options
@@ -16,16 +15,16 @@ module BFS
       # @option opts [String] :password password for login.
       # @option opts [String] :passive connect in passive mode. Default: true.
       # @option opts [String] :prefix optional prefix.
-      def initialize(host, opts={})
+      def initialize(host, **opts)
         opts = opts.dup
         opts.keys.each do |key|
           val = opts.delete(key)
           opts[key.to_sym] = val unless val.nil?
         end
-        super(opts)
+        super(**opts)
 
         prefix  = opts.delete(:prefix)
-        @client = Net::FTP.new(host, opts)
+        @client = Net::FTP.new(host, **opts)
         @client.binary = true
 
         if prefix # rubocop:disable Style/GuardClause
@@ -36,7 +35,7 @@ module BFS
       end
 
       # Lists the contents of a bucket using a glob pattern
-      def ls(pattern='**/*', _opts={})
+      def ls(pattern = '**/*', **_opts)
         dir = pattern[%r{^[^\*\?\{\}\[\]]+/}]
         dir&.chomp!('/')
 
@@ -48,7 +47,7 @@ module BFS
       end
 
       # Info returns the object info
-      def info(path, _opts={})
+      def info(path, **_opts)
         path = norm_path(path)
         BFS::FileInfo.new(path, @client.size(path), @client.mtime(path))
       rescue Net::FTPPermError
@@ -56,7 +55,7 @@ module BFS
       end
 
       # Creates a new file and opens it for writing
-      def create(path, opts={}, &block)
+      def create(path, **opts, &block)
         path = norm_path(path)
         enc  = opts.delete(:encoding) || @encoding
         temp = BFS::TempWriter.new(path, encoding: enc) do |t|
@@ -73,7 +72,7 @@ module BFS
       end
 
       # Opens an existing file for reading
-      def open(path, opts={}, &block)
+      def open(path, **opts, &block)
         path = norm_path(path)
         enc  = opts.delete(:encoding) || @encoding
         temp = Tempfile.new(File.basename(path), encoding: enc)
@@ -86,7 +85,7 @@ module BFS
       end
 
       # Deletes a file.
-      def rm(path, _opts={})
+      def rm(path, **_opts)
         path = norm_path(path)
         @client.delete(path)
       rescue Net::FTPPermError # rubocop:disable Lint/SuppressedException
@@ -114,10 +113,8 @@ module BFS
       def mkdir_p(path)
         parts = path.split('/').reject(&:empty?)
         (0...parts.size).each do |i|
-          begin
-            @client.mkdir parts[0..i].join('/')
-          rescue Net::FTPPermError # rubocop:disable Lint/SuppressedException
-          end
+          @client.mkdir parts[0..i].join('/')
+        rescue Net::FTPPermError # rubocop:disable Lint/SuppressedException
         end
       end
     end
@@ -128,9 +125,9 @@ BFS.register('ftp', 'sftp') do |url|
   params = CGI.parse(url.query.to_s)
 
   BFS::Bucket::FTP.new url.host,
-    username: url.user ? CGI.unescape(url.user) : nil,
-    password: url.password ? CGI.unescape(url.password) : nil,
-    port: url.port,
-    ssl: params.key?('ssl') || url.scheme == 'sftp',
-    prefix: params.key?('prefix') ? params['prefix'].first : nil
+                       username: url.user ? CGI.unescape(url.user) : nil,
+                       password: url.password ? CGI.unescape(url.password) : nil,
+                       port: url.port,
+                       ssl: params.key?('ssl') || url.scheme == 'sftp',
+                       prefix: params.key?('prefix') ? params['prefix'].first : nil
 end

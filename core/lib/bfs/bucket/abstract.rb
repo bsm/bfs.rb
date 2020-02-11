@@ -6,33 +6,33 @@ module BFS
       # Initializes a new bucket
       # @param [Hash] opts options
       # @option opts [String] :encoding Custom encoding. Default: Encoding.default_external.
-      def initialize(opts={})
+      def initialize(**opts)
         @encoding = opts.delete(:encoding) || Encoding.default_external
       end
 
       # Lists the contents of a bucket using a glob pattern
-      def ls(_pattern='**', _opts={})
+      def ls(_pattern = '**', **_opts)
         raise 'not implemented'
       end
 
       # Info returns the info for a single file
-      def info(_path, _opts={})
+      def info(_path, **_opts)
         raise 'not implemented'
       end
 
       # Creates a new file and opens it for writing
-      def create(_path, _opts={})
+      def create(_path, **_opts)
         raise 'not implemented'
       end
 
       # Opens an existing file for reading
       # May raise BFS::FileNotFound
-      def open(_path, _opts={})
+      def open(_path, **_opts)
         raise 'not implemented'
       end
 
       # Deletes a file.
-      def rm(_path, _opts={})
+      def rm(_path, **_opts)
         raise 'not implemented'
       end
 
@@ -40,8 +40,8 @@ module BFS
       #
       # @param [String] path The path to read from.
       # @param [Hash] opts Additional options, see #open.
-      def read(path, opts={})
-        open(path, opts, &:read)
+      def read(path, **opts)
+        open(path, **opts, &:read)
       end
 
       # Shortcut method to write data to path
@@ -49,17 +49,17 @@ module BFS
       # @param [String] path The path to write to.
       # @param [String] data The data to write.
       # @param [Hash] opts Additional options, see #create.
-      def write(path, data, opts={})
-        create(path, opts) {|f| f.write data }
+      def write(path, data, **opts)
+        create(path, **opts) {|f| f.write data }
       end
 
       # Copies src to dst
       #
       # @param [String] src The source path.
       # @param [String] dst The destination path.
-      def cp(src, dst, opts={})
-        open(src, opts) do |r|
-          create(dst, opts) do |w|
+      def cp(src, dst, **opts)
+        open(src, **opts) do |r|
+          create(dst, **opts) do |w|
             IO.copy_stream(r, w)
           end
         end
@@ -69,7 +69,7 @@ module BFS
       #
       # @param [String] src The source path.
       # @param [String] dst The destination path.
-      def mv(src, dst, _opts={})
+      def mv(src, dst, **_opts)
         cp(src, dst)
         rm(src)
       end

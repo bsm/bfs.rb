@@ -14,14 +14,14 @@ run_spec = \
 
 RSpec.describe BFS::Bucket::SCP, if: run_spec do
   context 'absolute' do
-    subject { described_class.new sandbox[:host], sandbox[:opts].merge(prefix: SecureRandom.uuid) }
+    subject { described_class.new sandbox[:host], **sandbox[:opts].merge(prefix: SecureRandom.uuid) }
     after   { subject.close }
 
     it_behaves_like 'a bucket', content_type: false, metadata: false
   end
 
   context 'relative' do
-    subject { described_class.new sandbox[:host], sandbox[:opts].merge(prefix: "~/#{SecureRandom.uuid}") }
+    subject { described_class.new sandbox[:host], **sandbox[:opts].merge(prefix: "~/#{SecureRandom.uuid}") }
     after   { subject.close }
 
     it_behaves_like 'a bucket', content_type: false, metadata: false

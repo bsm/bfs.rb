@@ -1,9 +1,11 @@
-RSpec.shared_examples 'a bucket' do |features={}|
+RSpec.shared_examples 'a bucket' do |features|
+  features ||= {}
+
   before do
     subject.write '/a/b.txt', 'TESTDATA-b'
     subject.write 'a/b/c.txt', 'TESTDATA-c',
-      content_type: 'text/plain',
-      metadata: { 'meta-KEY' => 'VaLuE' }
+                  content_type: 'text/plain',
+                  metadata: { 'meta-KEY' => 'VaLuE' }
     subject.write 'a/b/c/d.txt', 'TESTDATA-d'
     subject.write 'a/b/c/d/e.txt', 'TESTDATA-e'
   end
