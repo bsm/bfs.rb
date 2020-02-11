@@ -21,17 +21,17 @@ module BFS
       # @option opts [String] :acl set the default ACL.
       # @option opts [Google::Cloud::Storage] :client custom client.
       # @option opts [String] :encoding Custom encoding.
-      def initialize(name, opts={})
+      def initialize(name, **opts)
         opts = opts.dup
         opts.keys.each do |key|
           val = opts.delete(key)
           opts[key.to_sym] = val unless val.nil?
         end
-        super(opts)
+        super(**opts)
 
         @prefix = opts.delete(:prefix)
         acl     = opts.delete(:acl)
-        client  = opts.delete(:client) || Google::Cloud::Storage.new(opts)
+        client  = opts.delete(:client) || Google::Cloud::Storage.new(**opts)
 
         @name   = name.to_s
         @bucket = client.bucket(@name)
@@ -39,13 +39,13 @@ module BFS
       end
 
       # Lists the contents of a bucket using a glob pattern
-      def ls(pattern='**/*', opts={})
+      def ls(pattern = '**/*', **opts)
         prefix = pattern[%r{^[^\*\?\{\}\[\]]+/}]
         prefix = File.join(*[@prefix, prefix].compact) if @prefix
         opts   = opts.merge(prefix: prefix) if prefix
 
         Enumerator.new do |y|
-          @bucket.files(opts).all do |file|
+          @bucket.files(**opts).all do |file|
             name = trim_prefix(file.name)
             y << name if File.fnmatch?(pattern, name, File::FNM_PATHNAME)
           end
@@ -53,7 +53,7 @@ module BFS
       end
 
       # Info returns the object info
-      def info(path, _opts={})
+      def info(path, **_opts)
         path = full_path(path)
         file = @bucket.file(path)
         raise BFS::FileNotFound, trim_prefix(path) unless file
@@ -63,13 +63,13 @@ module BFS
       end
 
       # Creates a new file and opens it for writing
-      def create(path, opts={}, &block)
+      def create(path, **opts, &block)
         opts[:metadata] = norm_meta(opts[:metadata])
         path = full_path(path)
         enc  = opts.delete(:encoding) || @encoding
         temp = BFS::TempWriter.new(path, encoding: enc) do |t|
           File.open(t, encoding: enc) do |file|
-            @bucket.create_file(file, path, opts)
+            @bucket.create_file(file, path, **opts)
           end
         end
         return temp unless block
@@ -82,7 +82,7 @@ module BFS
       end
 
       # Opens an existing file for reading
-      def open(path, opts={}, &block)
+      def open(path, **opts, &block)
         path = full_path(path)
         enc  = opts.delete(:encoding) || @encoding
         file = @bucket.file(path)
@@ -96,19 +96,19 @@ module BFS
       end
 
       # Deletes a file.
-      def rm(path, opts={})
+      def rm(path, **opts)
         path = full_path(path)
         file = @bucket.file(path)
-        file&.delete(opts)
+        file&.delete(**opts)
       end
 
       # Copies a file.
-      def cp(src, dst, opts={})
+      def cp(src, dst, **opts)
         src  = full_path(src)
         file = @bucket.file(src)
         raise BFS::FileNotFound, trim_prefix(src) unless file
 
-        file.copy(full_path(dst), opts)
+        file.copy(full_path(dst), **opts)
       end
     end
   end
@@ -120,10 +120,10 @@ BFS.register('gs') do |url|
   prefix = nil if prefix.empty?
 
   BFS::Bucket::GS.new url.host,
-    prefix: prefix,
-    project_id: params.key?('project_id') ? params['project_id'].first : nil,
-    credentials: params.key?('credentials') ? params['credentials'].first : nil,
-    acl: params.key?('acl') ? params['acl'].first : nil,
-    timeout: params.key?('timeout') ? params['timeout'].first.to_i : nil,
-    retries: params.key?('retries') ? params['retries'].first.to_i : nil
+                      prefix: prefix,
+                      project_id: params.key?('project_id') ? params['project_id'].first : nil,
+                      credentials: params.key?('credentials') ? params['credentials'].first : nil,
+                      acl: params.key?('acl') ? params['acl'].first : nil,
+                      timeout: params.key?('timeout') ? params['timeout'].first.to_i : nil,
+                      retries: params.key?('retries') ? params['retries'].first.to_i : nil
 end

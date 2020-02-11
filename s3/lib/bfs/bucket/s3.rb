@@ -22,24 +22,24 @@ module BFS
       # @option opts [String] :storage_class storage class
       # @option opts [Aws::S3::Client] :client custom client, uses default_client by default
       # @option opts [String] :encoding Custom encoding.
-      def initialize(name, opts={})
+      def initialize(name, **opts)
         opts = opts.dup
         opts.keys.each do |key|
           val = opts.delete(key)
           opts[key.to_sym] = val unless val.nil?
         end
-        super(opts)
+        super(**opts)
 
         @name = name
         @sse = opts[:sse] || opts[:server_side_encryption]
         @prefix = opts[:prefix]
         @acl = opts[:acl].to_sym if opts[:acl]
         @storage_class = opts[:storage_class]
-        @client = opts[:client] || init_client(opts)
+        @client = opts[:client] || init_client(**opts)
       end
 
       # Lists the contents of a bucket using a glob pattern
-      def ls(pattern='**/*', opts={})
+      def ls(pattern = '**/*', **opts)
         prefix = pattern[%r{^[^\*\?\{\}\[\]]+/}]
         prefix = File.join(*[@prefix, prefix].compact) if @prefix
 
@@ -61,10 +61,10 @@ module BFS
       end
 
       # Info returns the object info
-      def info(path, opts={})
+      def info(path, **opts)
         path = norm_path(path)
         opts = opts.merge(bucket: name, key: full_path(path))
-        info = @client.head_object(opts)
+        info = @client.head_object(**opts)
         raise BFS::FileNotFound, path unless info
 
         BFS::FileInfo.new(path, info.content_length, info.last_modified, info.content_type, norm_meta(info.metadata))
@@ -79,7 +79,7 @@ module BFS
       # @option opts [String] :acl custom ACL override
       # @option opts [String] :server_side_encryption SSE override
       # @option opts [String] :storage_class storage class override
-      def create(path, opts={}, &block)
+      def create(path, **opts, &block)
         path = full_path(path)
         enc  = opts.delete(:encoding) || @encoding
         opts = opts.merge(
@@ -108,7 +108,7 @@ module BFS
       # @param [String] path
       # @param [Hash] opts options
       # @option opts [String] :encoding Custom encoding.
-      def open(path, opts={}, &block)
+      def open(path, **opts, &block)
         path = full_path(path)
         enc  = opts.delete(:encoding) || @encoding
         temp = Tempfile.new(File.basename(path), encoding: enc)
@@ -119,7 +119,7 @@ module BFS
           bucket: name,
           key: path,
         )
-        @client.get_object(opts)
+        @client.get_object(**opts)
 
         File.open(temp.path, encoding: enc, &block)
       rescue Aws::S3::Errors::NoSuchKey, Aws::S3::Errors::NoSuchBucket, Aws::S3::Errors::NotFound
@@ -127,18 +127,18 @@ module BFS
       end
 
       # Deletes a file.
-      def rm(path, opts={})
+      def rm(path, **opts)
         path = full_path(path)
         opts = opts.merge(
           bucket: name,
           key: path,
         )
-        @client.delete_object(opts)
+        @client.delete_object(**opts)
       rescue Aws::S3::Errors::NoSuchKey, Aws::S3::Errors::NoSuchBucket, Aws::S3::Errors::NotFound # rubocop:disable Lint/SuppressedException
       end
 
       # Copies a file.
-      def cp(src, dst, opts={})
+      def cp(src, dst, **opts)
         src = full_path(src)
         dst = full_path(dst)
         opts = opts.merge(
@@ -146,14 +146,14 @@ module BFS
           copy_source: "/#{name}/#{src}",
           key: dst,
         )
-        @client.copy_object(opts)
+        @client.copy_object(**opts)
       rescue Aws::S3::Errors::NoSuchKey, Aws::S3::Errors::NoSuchBucket, Aws::S3::Errors::NotFound
         raise BFS::FileNotFound, trim_prefix(src)
       end
 
       private
 
-      def init_client(opts)
+      def init_client(**opts)
         config = {}
         config[:region] = opts[:region] if opts[:region]
         config[:credentials] = opts[:credentials] if opts[:credentials]
@@ -172,11 +172,11 @@ BFS.register('s3') do |url|
   prefix = nil if prefix.empty?
 
   BFS::Bucket::S3.new url.host,
-    prefix: prefix,
-    region: params.key?('region') ? params['region'].first : nil,
-    sse: params.key?('sse') ? params['sse'].first : nil,
-    access_key_id: params.key?('access_key_id') ? params['access_key_id'].first : nil,
-    secret_access_key: params.key?('secret_access_key') ? params['secret_access_key'].first : nil,
-    acl: params.key?('acl') ? params['acl'].first : nil,
-    storage_class: params.key?('storage_class') ? params['storage_class'].first : nil
+                      prefix: prefix,
+                      region: params.key?('region') ? params['region'].first : nil,
+                      sse: params.key?('sse') ? params['sse'].first : nil,
+                      access_key_id: params.key?('access_key_id') ? params['access_key_id'].first : nil,
+                      secret_access_key: params.key?('secret_access_key') ? params['secret_access_key'].first : nil,
+                      acl: params.key?('acl') ? params['acl'].first : nil,
+                      storage_class: params.key?('storage_class') ? params['storage_class'].first : nil
 end

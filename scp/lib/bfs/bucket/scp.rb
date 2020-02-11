@@ -10,7 +10,7 @@ module BFS
       class CommandError < RuntimeError
         attr_reader :status
 
-        def initialize(cmd, status, extra=nil)
+        def initialize(cmd, status, extra = nil)
           @status = status
           super ["Command '#{cmd}' exited with status #{status}", extra].join(': ')
         end
@@ -28,16 +28,16 @@ module BFS
       # @option opts [Integer] :keepalive_interval interval if keepalive enabled. Default: 300.
       # @option opts [Array<String>] :keys an array of file names of private keys to use for publickey and hostbased authentication.
       # @option opts [Boolean|Symbol] :verify_host_key specifying how strict host-key verification should be, either false, true, :very, or :secure.
-      def initialize(host, opts={})
+      def initialize(host, **opts)
         opts = opts.dup
         opts.keys.each do |key|
           val = opts.delete(key)
           opts[key.to_sym] = val unless val.nil?
         end
-        super(opts)
+        super(**opts)
 
         @prefix = opts.delete(:prefix)
-        @client = Net::SCP.start(host, nil, opts)
+        @client = Net::SCP.start(host, nil, **opts)
 
         if @prefix # rubocop:disable Style/GuardClause
           @prefix = norm_path(@prefix) + '/'
@@ -46,7 +46,7 @@ module BFS
       end
 
       # Lists the contents of a bucket using a glob pattern
-      def ls(pattern='**/*', _opts={})
+      def ls(pattern = '**/*', **_opts)
         prefix = @prefix ? abs_path(@prefix) : '/'
         Enumerator.new do |y|
           sh! 'find', prefix, '-type', 'f' do |out|
@@ -59,7 +59,7 @@ module BFS
       end
 
       # Info returns the object info
-      def info(path, _opts={})
+      def info(path, **_opts)
         full = full_path(path)
         path = norm_path(path)
         out  = sh! 'stat', '-c', '%s;%Z', full
@@ -71,12 +71,15 @@ module BFS
       end
 
       # Creates a new file and opens it for writing
-      def create(path, opts={}, &block)
+      # @option opts [String|Encoding] :encoding Custom file encoding.
+      # @option opts [Integer] :perm Custom file permission, default: 0600.
+      def create(path, **opts, &block)
         full = full_path(path)
+        perm = opts[:perm]
         enc  = opts.delete(:encoding) || @encoding
-        temp = BFS::TempWriter.new(path, encoding: enc) do |temp_path|
+        temp = BFS::TempWriter.new(path, perm: perm, encoding: enc) do |temp_path|
           mkdir_p File.dirname(full)
-          @client.upload!(temp_path, full)
+          @client.upload!(temp_path, full, preserve: true)
         end
         return temp unless block
 
@@ -88,7 +91,7 @@ module BFS
       end
 
       # Opens an existing file for reading
-      def open(path, opts={}, &block)
+      def open(path, **opts, &block)
         full = full_path(path)
         enc  = opts.delete(:encoding) || @encoding
         temp = Tempfile.new(File.basename(path), encoding: enc)
@@ -101,7 +104,7 @@ module BFS
       end
 
       # Deletes a file.
-      def rm(path, _opts={})
+      def rm(path, **_opts)
         path = full_path(path)
         sh! 'rm', '-f', path
       end
@@ -110,7 +113,7 @@ module BFS
       #
       # @param [String] src The source path.
       # @param [String] dst The destination path.
-      def cp(src, dst, _opts={})
+      def cp(src, dst, **_opts)
         full_src = full_path(src)
         full_dst = full_path(dst)
 
@@ -124,7 +127,7 @@ module BFS
       #
       # @param [String] src The source path.
       # @param [String] dst The destination path.
-      def mv(src, dst, _opts={})
+      def mv(src, dst, **_opts)
         full_src = full_path(src)
         full_dst = full_path(dst)
 
@@ -195,5 +198,5 @@ BFS.register('scp', 'ssh') do |url|
   opts[:password] ||= CGI.unescape(url.password) if url.password
   opts[:port] ||= url.port if url.port
 
-  BFS::Bucket::SCP.new url.host, opts
+  BFS::Bucket::SCP.new(url.host, **opts)
 end
