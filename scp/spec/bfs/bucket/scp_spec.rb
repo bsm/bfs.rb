@@ -45,4 +45,20 @@ RSpec.describe BFS::Bucket::SCP, if: run_spec do
     abs.close
     rel.close
   end
+
+  context 'preserve' do
+    subject { described_class.new sandbox[:host], sandbox[:opts].merge(prefix: "~/#{SecureRandom.uuid}", preserve: true) }
+    after   { subject.close }
+
+    it 'should preserve file permissions on upload' do
+      subject.create('perms.txt', permissions: 755) do |f|
+        f.write('access')
+      end
+      expect(subject.info('perms.txt').metadata[:permissions]).to(eq(755))
+    end
+
+    xit 'should preserve file permissions on download' do
+
+    end
+  end
 end

@@ -25,6 +25,7 @@ module BFS
       # @option opts [String] :prefix optional prefix.
       # @option opts [Boolean] :compression use compression.
       # @option opts [Boolean] :keepalive use keepalive.
+      # @option opts [Boolean] :preserve preserve file permissions.
       # @option opts [Integer] :keepalive_interval interval if keepalive enabled. Default: 300.
       # @option opts [Array<String>] :keys an array of file names of private keys to use for publickey and hostbased authentication.
       # @option opts [Boolean|Symbol] :verify_host_key specifying how strict host-key verification should be, either false, true, :very, or :secure.
@@ -37,6 +38,7 @@ module BFS
         super(opts)
 
         @prefix = opts.delete(:prefix)
+        @preserve = !!opts.delete(:preserve)
         @client = Net::SCP.start(host, nil, opts)
 
         if @prefix # rubocop:disable Style/GuardClause
@@ -62,10 +64,11 @@ module BFS
       def info(path, _opts={})
         full = full_path(path)
         path = norm_path(path)
-        out  = sh! 'stat', '-c', '%s;%Z', full
+        out  = sh! 'stat', '-c', '%s;%Z;%a|%G', full
 
-        size, epoch = out.strip.split(';', 2).map(&:to_i)
-        BFS::FileInfo.new(path, size, Time.at(epoch))
+        ints, group = out.strip.split('|', 2)
+        size, epoch, perms = ints.split(';', 3).map(&:to_i)
+        BFS::FileInfo.new(path, size, Time.at(epoch), nil, group: group, permissions: perms)
       rescue CommandError => e
         e.status == 1 ? raise(BFS::FileNotFound, path) : raise
       end
@@ -74,9 +77,13 @@ module BFS
       def create(path, opts={}, &block)
         full = full_path(path)
         enc  = opts.delete(:encoding) || @encoding
+        perms = opts.delete(:permissions) || 0640
+        preserve = opts.delete(:preserve) || @preserve
         temp = BFS::TempWriter.new(path, encoding: enc) do |temp_path|
           mkdir_p File.dirname(full)
-          @client.upload!(temp_path, full)
+          upload_opts = {}
+          upload_opts.merge(mode: perms, preserve: preserve) if preserve
+          @client.upload!(temp_path, full, upload_opts)
         end
         return temp unless block
 
