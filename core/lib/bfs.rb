@@ -1,7 +1,36 @@
 require 'uri'
 
 module BFS
-  FileInfo = Struct.new(:path, :size, :mtime, :content_type, :metadata)
+  class FileInfo < Hash
+    def initialize(**attrs)
+      update(size: 0, mtime: Time.at(0), mode: 0, metadata: {})
+      update(attrs)
+    end
+
+    def path
+      fetch(:path, nil)
+    end
+
+    def size
+      fetch(:size, 0)
+    end
+
+    def content_type
+      fetch(:content_type, nil)
+    end
+
+    def mtime
+      fetch(:mtime, Time.at(0))
+    end
+
+    def mode
+      fetch(:mode, 0)
+    end
+
+    def metadata
+      fetch(:metadata, {})
+    end
+  end
 
   def self.register(*schemes, &resolver)
     @registry ||= {}
@@ -24,6 +53,11 @@ module BFS
     path.sub!(%r{^/+}, '')
     path.sub!(%r{/+$}, '')
     path
+  end
+
+  def self.norm_mode(mode)
+    mode = mode.to_i(8) if mode.is_a?(String)
+    mode & 0o000777
   end
 end
 

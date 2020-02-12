@@ -21,17 +21,11 @@ module BFS
       # @option opts [String] :acl set the default ACL.
       # @option opts [Google::Cloud::Storage] :client custom client.
       # @option opts [String] :encoding Custom encoding.
-      def initialize(name, **opts)
-        opts = opts.dup
-        opts.keys.each do |key|
-          val = opts.delete(key)
-          opts[key.to_sym] = val unless val.nil?
-        end
+      def initialize(name, prefix: nil, acl: nil, client: nil, **opts)
         super(**opts)
 
-        @prefix = opts.delete(:prefix)
-        acl     = opts.delete(:acl)
-        client  = opts.delete(:client) || Google::Cloud::Storage.new(**opts)
+        @prefix = prefix
+        client ||= Google::Cloud::Storage.new(**opts)
 
         @name   = name.to_s
         @bucket = client.bucket(@name)
@@ -59,15 +53,15 @@ module BFS
         raise BFS::FileNotFound, trim_prefix(path) unless file
 
         name = trim_prefix(file.name)
-        BFS::FileInfo.new(name, file.size, file.updated_at.to_time, file.content_type, norm_meta(file.metadata))
+        BFS::FileInfo.new(path: name, size: file.size, mtime: file.updated_at.to_time, content_type: file.content_type, metadata: norm_meta(file.metadata))
       end
 
       # Creates a new file and opens it for writing
-      def create(path, **opts, &block)
+      def create(path, encoding: nil, perm: nil, **opts, &block)
         opts[:metadata] = norm_meta(opts[:metadata])
         path = full_path(path)
-        enc  = opts.delete(:encoding) || @encoding
-        temp = BFS::TempWriter.new(path, encoding: enc) do |t|
+        enc  = encoding || @encoding
+        temp = BFS::TempWriter.new(path, encoding: enc, perm: perm) do |t|
           File.open(t, encoding: enc) do |file|
             @bucket.create_file(file, path, **opts)
           end
@@ -82,13 +76,13 @@ module BFS
       end
 
       # Opens an existing file for reading
-      def open(path, **opts, &block)
+      def open(path, encoding: nil, tempdir: nil, **opts, &block)
         path = full_path(path)
-        enc  = opts.delete(:encoding) || @encoding
+        enc  = encoding || @encoding
         file = @bucket.file(path)
         raise BFS::FileNotFound, trim_prefix(path) unless file
 
-        temp = Tempfile.new(File.basename(path), encoding: enc)
+        temp = Tempfile.new(File.basename(path), tempdir, encoding: enc)
         temp.close
         file.download temp.path, opts
 

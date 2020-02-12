@@ -20,7 +20,7 @@ RSpec.describe BFS::Bucket::FS do
   it 'should support custom perms' do
     blob = BFS::Blob.new("file://#{tmpdir}/test.txt")
     blob.create(perm: 0o666) {|w| w.write 'foo' }
-    expect(File.stat(File.join(tmpdir, 'test.txt')).mode).to eq(0o100666)
+    expect(blob.info.mode).to eq(0o666)
     blob.close
   end
 end

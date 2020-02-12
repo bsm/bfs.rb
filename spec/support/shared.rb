@@ -70,8 +70,8 @@ RSpec.shared_examples 'a bucket' do |features|
     r.close
   end
 
-  it 'should write/read (custom encoding)' do
-    w = subject.create('y.txt', encoding: 'iso-8859-15')
+  it 'should write/read (custom encoding + perm)' do
+    w = subject.create('y.txt', encoding: 'iso-8859-15', perm: 0o644)
     w.write('DATA-y')
     w.close
 
@@ -80,6 +80,9 @@ RSpec.shared_examples 'a bucket' do |features|
     expect(data).to eq('DATA-y')
     expect(data.encoding).to eq(Encoding::ISO_8859_15)
     r.close
+
+    info = subject.info('y.txt')
+    expect(info.mode).to eq(0).or eq(0o644)
   end
 
   it 'should raise FileNotFound if not foudn on read' do

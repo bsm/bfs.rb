@@ -6,8 +6,8 @@ module BFS
       # Initializes a new bucket
       # @param [Hash] opts options
       # @option opts [String] :encoding Custom encoding. Default: Encoding.default_external.
-      def initialize(**opts)
-        @encoding = opts.delete(:encoding) || Encoding.default_external
+      def initialize(encoding: Encoding.default_external, **_opts)
+        @encoding = encoding
       end
 
       # Lists the contents of a bucket using a glob pattern

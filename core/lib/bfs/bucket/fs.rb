@@ -26,7 +26,8 @@ module BFS
       def info(path, **_opts)
         full = @root.join(norm_path(path))
         path = trim_prefix(full.to_s)
-        BFS::FileInfo.new(path, full.size, full.mtime, nil, {})
+        stat = full.stat
+        BFS::FileInfo.new(path: path, size: stat.size, mtime: stat.mtime, mode: BFS.norm_mode(stat.mode))
       rescue Errno::ENOENT
         raise BFS::FileNotFound, path
       end
@@ -37,13 +38,12 @@ module BFS
       # @param [Hash] opts Additional options.
       # @option opts [String] :encoding Custom encoding.
       # @option opts [Integer] :perm Custom file permission, default: 0600.
-      def create(path, **opts, &block)
+      def create(path, encoding: nil, perm: nil, **_opts, &block)
         full = @root.join(norm_path(path))
         FileUtils.mkdir_p(full.dirname.to_s)
 
-        perm = opts[:perm]
-        enc  = opts[:encoding] || @encoding
-        temp = BFS::TempWriter.new(full, perm: perm, encoding: enc) {|t| FileUtils.mv t, full.to_s }
+        enc  = encoding || @encoding
+        temp = BFS::TempWriter.new(full, encoding: enc, perm: perm) {|t| FileUtils.mv t, full.to_s }
         return temp unless block
 
         begin
