@@ -28,15 +28,10 @@ module BFS
       # @option opts [Integer] :keepalive_interval interval if keepalive enabled. Default: 300.
       # @option opts [Array<String>] :keys an array of file names of private keys to use for publickey and hostbased authentication.
       # @option opts [Boolean|Symbol] :verify_host_key specifying how strict host-key verification should be, either false, true, :very, or :secure.
-      def initialize(host, **opts)
-        opts = opts.dup
-        opts.keys.each do |key|
-          val = opts.delete(key)
-          opts[key.to_sym] = val unless val.nil?
-        end
+      def initialize(host, prefix: nil, **opts)
         super(**opts)
 
-        @prefix = opts.delete(:prefix)
+        @prefix = prefix
         @client = Net::SCP.start(host, nil, **opts)
 
         if @prefix # rubocop:disable Style/GuardClause
@@ -62,10 +57,10 @@ module BFS
       def info(path, **_opts)
         full = full_path(path)
         path = norm_path(path)
-        out  = sh! 'stat', '-c', '%s;%Z', full
+        out  = sh! 'stat', '-c', '%s;%Z;%a', full
 
-        size, epoch = out.strip.split(';', 2).map(&:to_i)
-        BFS::FileInfo.new(path, size, Time.at(epoch))
+        size, epoch, mode = out.strip.split(';', 3)
+        BFS::FileInfo.new(path: path, size: size.to_i, mtime: Time.at(epoch.to_i), mode: BFS.norm_mode(mode))
       rescue CommandError => e
         e.status == 1 ? raise(BFS::FileNotFound, path) : raise
       end
@@ -73,13 +68,14 @@ module BFS
       # Creates a new file and opens it for writing
       # @option opts [String|Encoding] :encoding Custom file encoding.
       # @option opts [Integer] :perm Custom file permission, default: 0600.
-      def create(path, **opts, &block)
+      def create(path, encoding: nil, perm: nil, **opts, &block)
         full = full_path(path)
-        perm = opts[:perm]
-        enc  = opts.delete(:encoding) || @encoding
-        temp = BFS::TempWriter.new(path, perm: perm, encoding: enc) do |temp_path|
+
+        opts[:preserve] = true if perm && !opts.key?(:preserve)
+        enc = encoding || @encoding
+        temp = BFS::TempWriter.new(path, encoding: enc, perm: perm) do |temp_path|
           mkdir_p File.dirname(full)
-          @client.upload!(temp_path, full, preserve: true)
+          @client.upload!(temp_path, full, **opts)
         end
         return temp unless block
 
@@ -91,10 +87,10 @@ module BFS
       end
 
       # Opens an existing file for reading
-      def open(path, **opts, &block)
+      def open(path, encoding: nil, tempdir: nil, **_opts, &block)
         full = full_path(path)
-        enc  = opts.delete(:encoding) || @encoding
-        temp = Tempfile.new(File.basename(path), encoding: enc)
+        enc  = encoding || @encoding
+        temp = Tempfile.new(File.basename(path), tempdir, encoding: enc)
         temp.close
 
         @client.download!(full, temp.path)

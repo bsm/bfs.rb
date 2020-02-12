@@ -23,11 +23,6 @@ module BFS
       # @option opts [Aws::S3::Client] :client custom client, uses default_client by default
       # @option opts [String] :encoding Custom encoding.
       def initialize(name, **opts)
-        opts = opts.dup
-        opts.keys.each do |key|
-          val = opts.delete(key)
-          opts[key.to_sym] = val unless val.nil?
-        end
         super(**opts)
 
         @name = name
@@ -67,7 +62,7 @@ module BFS
         info = @client.head_object(**opts)
         raise BFS::FileNotFound, path unless info
 
-        BFS::FileInfo.new(path, info.content_length, info.last_modified, info.content_type, norm_meta(info.metadata))
+        BFS::FileInfo.new(path: path, size: info.content_length, mtime: info.last_modified, content_type: info.content_type, metadata: norm_meta(info.metadata))
       rescue Aws::S3::Errors::NoSuchKey, Aws::S3::Errors::NoSuchBucket, Aws::S3::Errors::NotFound
         raise BFS::FileNotFound, path
       end
@@ -79,9 +74,9 @@ module BFS
       # @option opts [String] :acl custom ACL override
       # @option opts [String] :server_side_encryption SSE override
       # @option opts [String] :storage_class storage class override
-      def create(path, **opts, &block)
+      def create(path, encoding: nil, perm: nil, **opts, &block)
         path = full_path(path)
-        enc  = opts.delete(:encoding) || @encoding
+        enc  = encoding || @encoding
         opts = opts.merge(
           bucket: name,
           key: path,
@@ -90,7 +85,7 @@ module BFS
         opts[:server_side_encryption] ||= @sse if @sse
         opts[:storage_class] ||= @storage_class if @storage_class
 
-        temp = BFS::TempWriter.new(path, encoding: enc) do |t|
+        temp = BFS::TempWriter.new(path, encoding: enc, perm: perm) do |t|
           File.open(t, encoding: enc) do |file|
             @client.put_object(opts.merge(body: file))
           end
@@ -108,10 +103,11 @@ module BFS
       # @param [String] path
       # @param [Hash] opts options
       # @option opts [String] :encoding Custom encoding.
-      def open(path, **opts, &block)
+      # @option opts [String] :tempdir Custom temp dir.
+      def open(path, encoding: nil, tempdir: nil, **opts, &block)
         path = full_path(path)
-        enc  = opts.delete(:encoding) || @encoding
-        temp = Tempfile.new(File.basename(path), encoding: enc)
+        enc  = encoding || @encoding
+        temp = Tempfile.new(File.basename(path), tempdir, encoding: enc)
         temp.close
 
         opts = opts.merge(

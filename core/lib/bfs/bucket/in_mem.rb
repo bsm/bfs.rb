@@ -32,7 +32,7 @@ module BFS
         raise BFS::FileNotFound, path unless @files.key?(path)
 
         entry = @files[path]
-        BFS::FileInfo.new(path, entry.io.size, entry.mtime, entry.content_type, entry.metadata)
+        BFS::FileInfo.new(path: path, size: entry.io.size, mtime: entry.mtime, content_type: entry.content_type, metadata: entry.metadata)
       end
 
       # Creates a new file and opens it for writing.
@@ -44,9 +44,10 @@ module BFS
       # @option opts [Hash] :metadata Metadata key-value pairs.
       def create(path, **opts, &block)
         io = StringIO.new
-        io.set_encoding(opts[:encoding] || @encoding)
+        io.set_encoding(opts.delete(:encoding) || @encoding)
 
-        @files[norm_path(path)] = Entry.new(io, Time.now, opts[:content_type], norm_meta(opts[:metadata]))
+        entry = Entry.new(io, Time.now, opts.delete(:content_type), norm_meta(opts.delete(:metadata)))
+        @files[norm_path(path)] = entry
         return io unless block
 
         begin

@@ -45,4 +45,11 @@ RSpec.describe BFS::Bucket::SCP, if: run_spec do
     abs.close
     rel.close
   end
+
+  it 'should support custom perms' do
+    blob = BFS::Blob.new("scp://root:root@127.0.0.1:7022/#{SecureRandom.uuid}/file.txt")
+    blob.create(perm: 0o666) {|w| w.write 'foo' }
+    expect(blob.info.mode).to eq(0o666)
+    blob.close
+  end
 end

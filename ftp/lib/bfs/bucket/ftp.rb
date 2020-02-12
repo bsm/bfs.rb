@@ -15,15 +15,9 @@ module BFS
       # @option opts [String] :password password for login.
       # @option opts [String] :passive connect in passive mode. Default: true.
       # @option opts [String] :prefix optional prefix.
-      def initialize(host, **opts)
-        opts = opts.dup
-        opts.keys.each do |key|
-          val = opts.delete(key)
-          opts[key.to_sym] = val unless val.nil?
-        end
+      def initialize(host, prefix: nil, **opts)
         super(**opts)
 
-        prefix  = opts.delete(:prefix)
         @client = Net::FTP.new(host, **opts)
         @client.binary = true
 
@@ -49,16 +43,17 @@ module BFS
       # Info returns the object info
       def info(path, **_opts)
         path = norm_path(path)
-        BFS::FileInfo.new(path, @client.size(path), @client.mtime(path))
+        BFS::FileInfo.new(path: path, size: @client.size(path), mtime: @client.mtime(path))
       rescue Net::FTPPermError
         raise BFS::FileNotFound, path
       end
 
       # Creates a new file and opens it for writing
-      def create(path, **opts, &block)
+      def create(path, encoding: nil, perm: nil, **_opts, &block)
         path = norm_path(path)
-        enc  = opts.delete(:encoding) || @encoding
-        temp = BFS::TempWriter.new(path, encoding: enc) do |t|
+
+        enc  = encoding || @encoding
+        temp = BFS::TempWriter.new(path, encoding: enc, perm: perm) do |t|
           mkdir_p File.dirname(path)
           @client.put(t, path)
         end
@@ -72,10 +67,10 @@ module BFS
       end
 
       # Opens an existing file for reading
-      def open(path, **opts, &block)
+      def open(path, encoding: nil, tempdir: nil, **_opts, &block)
         path = norm_path(path)
-        enc  = opts.delete(:encoding) || @encoding
-        temp = Tempfile.new(File.basename(path), encoding: enc)
+        enc  = encoding || @encoding
+        temp = Tempfile.new(File.basename(path), tempdir, encoding: enc)
         temp.close
 
         @client.get(path, temp.path)
