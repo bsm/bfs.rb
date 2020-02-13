@@ -20,7 +20,6 @@ module BFS
       # @option opts [Symbol] :acl canned ACL
       # @option opts [String] :storage_class storage class
       # @option opts [Aws::S3::Client] :client custom client, uses default_client by default
-      # @option opts [String] :encoding Custom encoding.
       def initialize(name, **opts)
         super(**opts)
 
@@ -73,9 +72,8 @@ module BFS
       # @option opts [String] :acl custom ACL override
       # @option opts [String] :server_side_encryption SSE override
       # @option opts [String] :storage_class storage class override
-      def create(path, encoding: nil, perm: nil, **opts, &block)
+      def create(path, encoding: self.encoding, perm: self.perm, **opts, &block)
         path = full_path(path)
-        enc  = encoding || @encoding
         opts = opts.merge(
           bucket: name,
           key: path,
@@ -84,8 +82,8 @@ module BFS
         opts[:server_side_encryption] ||= @sse if @sse
         opts[:storage_class] ||= @storage_class if @storage_class
 
-        temp = BFS::TempWriter.new(path, encoding: enc, perm: perm) do |t|
-          File.open(t, encoding: enc) do |file|
+        temp = BFS::TempWriter.new(path, encoding: encoding, perm: perm) do |t|
+          File.open(t, encoding: encoding) do |file|
             @client.put_object(opts.merge(body: file))
           end
         end
@@ -103,10 +101,9 @@ module BFS
       # @param [Hash] opts options
       # @option opts [String] :encoding Custom encoding.
       # @option opts [String] :tempdir Custom temp dir.
-      def open(path, encoding: nil, tempdir: nil, **opts, &block)
+      def open(path, encoding: self.encoding, tempdir: nil, **opts, &block)
         path = full_path(path)
-        enc  = encoding || @encoding
-        temp = Tempfile.new(File.basename(path), tempdir, encoding: enc)
+        temp = Tempfile.new(File.basename(path), tempdir, encoding: encoding)
         temp.close
 
         opts = opts.merge(
@@ -116,7 +113,7 @@ module BFS
         )
         @client.get_object(**opts)
 
-        File.open(temp.path, encoding: enc, &block)
+        File.open(temp.path, encoding: encoding, &block)
       rescue Aws::S3::Errors::NoSuchKey, Aws::S3::Errors::NoSuchBucket, Aws::S3::Errors::NotFound
         raise BFS::FileNotFound, trim_prefix(path)
       end

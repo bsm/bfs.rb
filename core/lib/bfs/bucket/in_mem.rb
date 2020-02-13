@@ -42,11 +42,11 @@ module BFS
       # @option opts [String] :encoding Custom encoding.
       # @option opts [String] :content_type Custom content type.
       # @option opts [Hash] :metadata Metadata key-value pairs.
-      def create(path, **opts, &block)
+      def create(path, encoding: self.encoding, content_type: nil, metadata: nil, **_opts, &block)
         io = StringIO.new
-        io.set_encoding(opts.delete(:encoding) || @encoding)
+        io.set_encoding(encoding)
 
-        entry = Entry.new(io, Time.now, opts.delete(:content_type), norm_meta(opts.delete(:metadata)))
+        entry = Entry.new(io, Time.now, content_type, norm_meta(metadata))
         @files[norm_path(path)] = entry
         return io unless block
 

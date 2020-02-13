@@ -5,6 +5,8 @@ module BFS
   module Bucket
     # FTP buckets are operating on ftp servers
     class FTP < Abstract
+      attr_reader :perm
+
       # Initializes a new bucket
       # @param [String] host the host name
       # @param [Hash] opts options
@@ -48,11 +50,9 @@ module BFS
       end
 
       # Creates a new file and opens it for writing
-      def create(path, encoding: nil, perm: nil, **_opts, &block)
+      def create(path, encoding: self.encoding, perm: self.perm, **_opts, &block)
         path = norm_path(path)
-
-        enc  = encoding || @encoding
-        temp = BFS::TempWriter.new(path, encoding: enc, perm: perm) do |t|
+        temp = BFS::TempWriter.new(path, encoding: encoding, perm: perm) do |t|
           mkdir_p File.dirname(path)
           @client.put(t, path)
         end
@@ -66,14 +66,13 @@ module BFS
       end
 
       # Opens an existing file for reading
-      def open(path, encoding: nil, tempdir: nil, **_opts, &block)
+      def open(path, encoding: self.encoding, perm: self.perm, tempdir: nil, **_opts, &block)
         path = norm_path(path)
-        enc  = encoding || @encoding
-        temp = Tempfile.new(File.basename(path), tempdir, encoding: enc)
+        temp = Tempfile.new(File.basename(path), tempdir, encoding: encoding, perm: perm)
         temp.close
 
         @client.get(path, temp.path)
-        File.open(temp.path, encoding: enc, &block)
+        File.open(temp.path, encoding: encoding, &block)
       rescue Net::FTPPermError
         raise BFS::FileNotFound, path
       end

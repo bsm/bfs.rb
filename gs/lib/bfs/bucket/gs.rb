@@ -56,12 +56,11 @@ module BFS
       end
 
       # Creates a new file and opens it for writing
-      def create(path, encoding: nil, perm: nil, **opts, &block)
+      def create(path, encoding: self.encoding, perm: self.perm, **opts, &block)
         opts[:metadata] = norm_meta(opts[:metadata])
         path = full_path(path)
-        enc  = encoding || @encoding
-        temp = BFS::TempWriter.new(path, encoding: enc, perm: perm) do |t|
-          File.open(t, encoding: enc) do |file|
+        temp = BFS::TempWriter.new(path, encoding: encoding, perm: perm) do |t|
+          File.open(t, encoding: encoding) do |file|
             @bucket.create_file(file, path, **opts)
           end
         end
@@ -75,17 +74,16 @@ module BFS
       end
 
       # Opens an existing file for reading
-      def open(path, encoding: nil, tempdir: nil, **opts, &block)
+      def open(path, encoding: self.encoding, tempdir: nil, **opts, &block)
         path = full_path(path)
-        enc  = encoding || @encoding
         file = @bucket.file(path)
         raise BFS::FileNotFound, trim_prefix(path) unless file
 
-        temp = Tempfile.new(File.basename(path), tempdir, encoding: enc)
+        temp = Tempfile.new(File.basename(path), tempdir, encoding: encoding)
         temp.close
-        file.download temp.path, opts
+        file.download(temp.path, **opts)
 
-        File.open(temp.path, encoding: enc, &block)
+        File.open(temp.path, encoding: encoding, &block)
       end
 
       # Deletes a file.
