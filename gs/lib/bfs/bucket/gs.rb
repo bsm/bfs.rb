@@ -108,16 +108,15 @@ module BFS
   end
 end
 
-BFS.register('gs') do |url|
-  params = CGI.parse(url.query.to_s)
-  prefix = BFS.norm_path(params.key?('prefix') ? params['prefix'].first : url.path)
+BFS.register('gs') do |url, opts|
+  prefix = BFS.norm_path(opts.key?(:prefix) ? opts[:prefix] : url.path)
   prefix = nil if prefix.empty?
 
   BFS::Bucket::GS.new url.host,
                       prefix: prefix,
-                      project_id: params.key?('project_id') ? params['project_id'].first : nil,
-                      credentials: params.key?('credentials') ? params['credentials'].first : nil,
-                      acl: params.key?('acl') ? params['acl'].first : nil,
-                      timeout: params.key?('timeout') ? params['timeout'].first.to_i : nil,
-                      retries: params.key?('retries') ? params['retries'].first.to_i : nil
+                      project_id: opts.key?(:project_id) ? opts[:project_id] : nil,
+                      credentials: opts.key?(:credentials) ? opts[:credentials] : nil,
+                      acl: opts.key?(:acl) ? opts[:acl] : nil,
+                      timeout: opts.key?(:timeout) ? opts[:timeout].to_i : nil,
+                      retries: opts.key?(:retries) ? opts[:retries].to_i : nil
 end

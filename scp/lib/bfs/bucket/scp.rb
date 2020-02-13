@@ -185,11 +185,7 @@ module BFS
   end
 end
 
-BFS.register('scp', 'ssh') do |url|
-  opts = {}
-  CGI.parse(url.query.to_s).each do |key, values|
-    opts[key.to_sym] = values.first
-  end
+BFS.register('scp', 'ssh') do |url, opts|
   opts[:user] ||= CGI.unescape(url.user) if url.user
   opts[:password] ||= CGI.unescape(url.password) if url.password
   opts[:port] ||= url.port if url.port
