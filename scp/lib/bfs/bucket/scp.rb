@@ -38,6 +38,7 @@ module BFS
           @prefix = norm_path(@prefix) + '/'
           mkdir_p abs_path(@prefix)
         end
+        @perm = opts[:perm]
       end
 
       # Lists the contents of a bucket using a glob pattern
@@ -73,7 +74,7 @@ module BFS
 
         opts[:preserve] = true if perm && !opts.key?(:preserve)
         enc = encoding || @encoding
-        temp = BFS::TempWriter.new(path, encoding: enc, perm: perm) do |temp_path|
+        temp = BFS::TempWriter.new(path, encoding: enc, perm: perm || @perm) do |temp_path|
           mkdir_p File.dirname(full)
           @client.upload!(temp_path, full, **opts)
         end
