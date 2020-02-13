@@ -166,7 +166,5 @@ BFS.register('s3') do |url, opts|
   prefix = BFS.norm_path(opts[:prefix] || url.path)
   opts[:prefix] = prefix.empty? ? nil : prefix
 
-  BFS::Bucket::S3.new url.host, **opts.slice(*%i[
-    prefix region sse access_key_id secret_access_key acl storage_class encoding
-  ])
+  BFS::Bucket::S3.new url.host, **opts.slice(:prefix, :region, :sse, :access_key_id, :secret_access_key, :acl, :storage_class, :encoding)
 end
