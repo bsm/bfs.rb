@@ -174,5 +174,6 @@ BFS.register('s3') do |url|
                       access_key_id: params.key?('access_key_id') ? params['access_key_id'].first : nil,
                       secret_access_key: params.key?('secret_access_key') ? params['secret_access_key'].first : nil,
                       acl: params.key?('acl') ? params['acl'].first : nil,
-                      storage_class: params.key?('storage_class') ? params['storage_class'].first : nil
+                      storage_class: params.key?('storage_class') ? params['storage_class'].first : nil,
+                      encoding: params.key?('encoding') ? params['encoding'].first : nil
 end
