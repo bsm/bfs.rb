@@ -3,11 +3,15 @@ require 'bfs'
 module BFS
   module Bucket
     class Abstract
+      attr_reader :encoding, :perm
+
       # Initializes a new bucket
       # @param [Hash] opts options
       # @option opts [String] :encoding Custom encoding. Default: Encoding.default_external.
+      # @option opts [Integer] :perm optional file permissions. Default: 0600.
       def initialize(encoding: Encoding.default_external, **_opts)
         @encoding = encoding
+        @perm = perm
       end
 
       # Lists the contents of a bucket using a glob pattern

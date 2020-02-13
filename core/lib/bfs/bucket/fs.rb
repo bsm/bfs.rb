@@ -11,7 +11,6 @@ module BFS
 
         @root = Pathname.new(root.to_s)
         @prefix = "#{@root.to_s.chomp('/')}/"
-        @perm = opts[:perm]
       end
 
       # Lists the contents of a bucket using a glob pattern
@@ -39,12 +38,11 @@ module BFS
       # @param [Hash] opts Additional options.
       # @option opts [String] :encoding Custom encoding.
       # @option opts [Integer] :perm Custom file permission, default: 0600.
-      def create(path, encoding: nil, perm: nil, **_opts, &block)
+      def create(path, encoding: self.encoding, perm: self.perm, **_opts, &block)
         full = @root.join(norm_path(path))
         FileUtils.mkdir_p(full.dirname.to_s)
 
-        enc  = encoding || @encoding
-        temp = BFS::TempWriter.new(full, encoding: enc, perm: perm || @perm) {|t| FileUtils.mv t, full.to_s }
+        temp = BFS::TempWriter.new(full, encoding: encoding, perm: perm) {|t| FileUtils.mv t, full.to_s }
         return temp unless block
 
         begin

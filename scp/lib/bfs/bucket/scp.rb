@@ -31,7 +31,6 @@ module BFS
         super(**opts)
 
         @prefix = prefix
-        @perm   = opts.delete(:perm)
         @client = Net::SCP.start(host, nil, **opts)
 
         if @prefix # rubocop:disable Style/GuardClause
@@ -68,12 +67,11 @@ module BFS
       # Creates a new file and opens it for writing
       # @option opts [String|Encoding] :encoding Custom file encoding.
       # @option opts [Integer] :perm Custom file permission, default: 0600.
-      def create(path, encoding: nil, perm: nil, **opts, &block)
+      def create(path, encoding: self.encoding, perm: self.perm, **opts, &block)
         full = full_path(path)
 
         opts[:preserve] = true if perm && !opts.key?(:preserve)
-        enc = encoding || @encoding
-        temp = BFS::TempWriter.new(path, encoding: enc, perm: perm || @perm) do |temp_path|
+        temp = BFS::TempWriter.new(path, encoding: encoding, perm: perm) do |temp_path|
           mkdir_p File.dirname(full)
           @client.upload!(temp_path, full, **opts)
         end
@@ -87,14 +85,13 @@ module BFS
       end
 
       # Opens an existing file for reading
-      def open(path, encoding: nil, tempdir: nil, **_opts, &block)
+      def open(path, encoding: self.encoding, tempdir: nil, **_opts, &block)
         full = full_path(path)
-        enc  = encoding || @encoding
-        temp = Tempfile.new(File.basename(path), tempdir, encoding: enc)
+        temp = Tempfile.new(File.basename(path), tempdir, encoding: encoding)
         temp.close
 
         @client.download!(full, temp.path)
-        File.open(temp.path, encoding: enc, &block)
+        File.open(temp.path, encoding: encoding, &block)
       rescue Net::SCP::Error
         raise BFS::FileNotFound, path
       end
