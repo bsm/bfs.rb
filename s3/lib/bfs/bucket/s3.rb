@@ -5,7 +5,7 @@ module BFS
   module Bucket
     # S3 buckets are operating on s3
     class S3 < Abstract
-      attr_reader :name, :sse, :acl, :storage_class
+      attr_reader :name, :encoding, :sse, :acl, :storage_class
 
       # Initializes a new S3 bucket
       # @param [String] name the bucket name
@@ -25,6 +25,7 @@ module BFS
         super(**opts)
 
         @name = name
+        @encoding = opts[:encoding]
         @sse = opts[:sse] || opts[:server_side_encryption]
         @prefix = opts[:prefix]
         @acl = opts[:acl].to_sym if opts[:acl]

@@ -83,7 +83,7 @@ module BFS
 
         temp = Tempfile.new(File.basename(path), tempdir, encoding: enc)
         temp.close
-        file.download temp.path, opts
+        file.download(temp.path, **opts)
 
         File.open(temp.path, encoding: enc, &block)
       end
