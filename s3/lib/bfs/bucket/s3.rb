@@ -1,6 +1,5 @@
 require 'bfs'
 require 'aws-sdk-s3'
-require 'cgi'
 
 module BFS
   module Bucket
@@ -162,17 +161,9 @@ module BFS
   end
 end
 
-BFS.register('s3') do |url|
-  params = CGI.parse(url.query.to_s)
-  prefix = BFS.norm_path(params.key?('prefix') ? params['prefix'].first : url.path)
-  prefix = nil if prefix.empty?
+BFS.register('s3') do |url, opts|
+  prefix = BFS.norm_path(opts[:prefix] || url.path)
+  opts[:prefix] = prefix.empty? ? nil : prefix
 
-  BFS::Bucket::S3.new url.host,
-                      prefix: prefix,
-                      region: params.key?('region') ? params['region'].first : nil,
-                      sse: params.key?('sse') ? params['sse'].first : nil,
-                      access_key_id: params.key?('access_key_id') ? params['access_key_id'].first : nil,
-                      secret_access_key: params.key?('secret_access_key') ? params['secret_access_key'].first : nil,
-                      acl: params.key?('acl') ? params['acl'].first : nil,
-                      storage_class: params.key?('storage_class') ? params['storage_class'].first : nil
+  BFS::Bucket::S3.new url.host, **opts.slice(:prefix, :region, :sse, :access_key_id, :secret_access_key, :acl, :storage_class, :encoding)
 end

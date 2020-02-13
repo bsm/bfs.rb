@@ -1,6 +1,5 @@
 require 'bfs'
 require 'google/cloud/storage'
-require 'cgi'
 
 module BFS
   module Bucket
@@ -108,16 +107,12 @@ module BFS
   end
 end
 
-BFS.register('gs') do |url|
-  params = CGI.parse(url.query.to_s)
-  prefix = BFS.norm_path(params.key?('prefix') ? params['prefix'].first : url.path)
+BFS.register('gs') do |url, opts|
+  prefix = BFS.norm_path(opts.key?(:prefix) ? opts[:prefix] : url.path)
   prefix = nil if prefix.empty?
 
-  BFS::Bucket::GS.new url.host,
+  BFS::Bucket::GS.new url.host, **opts.slice(:project_id, :credentials, :acl),
                       prefix: prefix,
-                      project_id: params.key?('project_id') ? params['project_id'].first : nil,
-                      credentials: params.key?('credentials') ? params['credentials'].first : nil,
-                      acl: params.key?('acl') ? params['acl'].first : nil,
-                      timeout: params.key?('timeout') ? params['timeout'].first.to_i : nil,
-                      retries: params.key?('retries') ? params['retries'].first.to_i : nil
+                      timeout: opts.key?(:timeout) ? opts[:timeout].to_i : nil,
+                      retries: opts.key?(:retries) ? opts[:retries].to_i : nil
 end

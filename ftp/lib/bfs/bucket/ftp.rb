@@ -1,6 +1,5 @@
 require 'bfs'
 require 'net/ftp/list'
-require 'cgi'
 
 module BFS
   module Bucket
@@ -116,13 +115,10 @@ module BFS
   end
 end
 
-BFS.register('ftp', 'sftp') do |url|
-  params = CGI.parse(url.query.to_s)
-
-  BFS::Bucket::FTP.new url.host,
+BFS.register('ftp', 'sftp') do |url, opts|
+  BFS::Bucket::FTP.new url.host, **opts,
                        username: url.user ? CGI.unescape(url.user) : nil,
                        password: url.password ? CGI.unescape(url.password) : nil,
                        port: url.port,
-                       ssl: params.key?('ssl') || url.scheme == 'sftp',
-                       prefix: params.key?('prefix') ? params['prefix'].first : nil
+                       ssl: opts.key?(:ssl) || url.scheme == 'sftp'
 end

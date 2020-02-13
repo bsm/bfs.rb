@@ -25,10 +25,11 @@ RSpec.describe BFS::Bucket::S3, if: run_spec do
   it_behaves_like 'a bucket'
 
   it 'should resolve from URL' do
-    bucket = BFS.resolve("s3://#{sandbox[:bucket]}/?acl=private")
+    bucket = BFS.resolve("s3://#{sandbox[:bucket]}/?acl=private&encoding=binary")
     expect(bucket).to be_instance_of(described_class)
     expect(bucket.name).to eq(sandbox[:bucket])
     expect(bucket.acl).to eq(:private)
+    expect(bucket.encoding).to eq('binary')
     expect(bucket.instance_variable_get(:@prefix)).to be_nil
 
     bucket = BFS.resolve("s3://#{sandbox[:bucket]}/a/b/")

@@ -1,6 +1,5 @@
 require 'bfs'
 require 'net/scp'
-require 'cgi'
 require 'shellwords'
 
 module BFS
@@ -32,6 +31,7 @@ module BFS
         super(**opts)
 
         @prefix = prefix
+        @perm   = opts.delete(:perm)
         @client = Net::SCP.start(host, nil, **opts)
 
         if @prefix # rubocop:disable Style/GuardClause
@@ -73,7 +73,7 @@ module BFS
 
         opts[:preserve] = true if perm && !opts.key?(:preserve)
         enc = encoding || @encoding
-        temp = BFS::TempWriter.new(path, encoding: enc, perm: perm) do |temp_path|
+        temp = BFS::TempWriter.new(path, encoding: enc, perm: perm || @perm) do |temp_path|
           mkdir_p File.dirname(full)
           @client.upload!(temp_path, full, **opts)
         end
@@ -185,11 +185,7 @@ module BFS
   end
 end
 
-BFS.register('scp', 'ssh') do |url|
-  opts = {}
-  CGI.parse(url.query.to_s).each do |key, values|
-    opts[key.to_sym] = values.first
-  end
+BFS.register('scp', 'ssh') do |url, opts|
   opts[:user] ||= CGI.unescape(url.user) if url.user
   opts[:password] ||= CGI.unescape(url.password) if url.password
   opts[:port] ||= url.port if url.port

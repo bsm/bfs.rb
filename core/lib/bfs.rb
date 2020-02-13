@@ -1,4 +1,5 @@
 require 'uri'
+require 'cgi'
 
 module BFS
   class FileInfo < Hash
@@ -44,7 +45,11 @@ module BFS
     rsl = @registry[url.scheme]
     raise ArgumentError, "Unable to resolve #{url}, scheme #{url.scheme} is not registered" unless rsl
 
-    rsl.call(url)
+    opts = {}
+    CGI.parse(url.query.to_s).each do |key, values|
+      opts[key.to_sym] = values.first
+    end
+    rsl.call(url, opts)
   end
 
   def self.norm_path(path)
