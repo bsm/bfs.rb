@@ -111,11 +111,8 @@ BFS.register('gs') do |url, opts|
   prefix = BFS.norm_path(opts.key?(:prefix) ? opts[:prefix] : url.path)
   prefix = nil if prefix.empty?
 
-  BFS::Bucket::GS.new url.host,
+  BFS::Bucket::GS.new url.host, **opts.slice(:project_id, :credentials, :acl),
                       prefix: prefix,
-                      project_id: opts.key?(:project_id) ? opts[:project_id] : nil,
-                      credentials: opts.key?(:credentials) ? opts[:credentials] : nil,
-                      acl: opts.key?(:acl) ? opts[:acl] : nil,
                       timeout: opts.key?(:timeout) ? opts[:timeout].to_i : nil,
                       retries: opts.key?(:retries) ? opts[:retries].to_i : nil
 end

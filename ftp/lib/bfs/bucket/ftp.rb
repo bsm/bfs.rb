@@ -116,11 +116,9 @@ module BFS
 end
 
 BFS.register('ftp', 'sftp') do |url, opts|
-  BFS::Bucket::FTP.new url.host,
+  BFS::Bucket::FTP.new url.host, **opts,
                        username: url.user ? CGI.unescape(url.user) : nil,
                        password: url.password ? CGI.unescape(url.password) : nil,
                        port: url.port,
-                       ssl: opts.key?(:ssl) || url.scheme == 'sftp',
-                       prefix: opts[:prefix],
-                       encoding: opts[:encoding]
+                       ssl: opts.key?(:ssl) || url.scheme == 'sftp'
 end
