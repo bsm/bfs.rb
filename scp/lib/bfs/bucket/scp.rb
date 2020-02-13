@@ -1,6 +1,5 @@
 require 'bfs'
 require 'net/scp'
-require 'cgi'
 require 'shellwords'
 
 module BFS
@@ -32,13 +31,13 @@ module BFS
         super(**opts)
 
         @prefix = prefix
+        @perm   = opts.delete(:perm)
         @client = Net::SCP.start(host, nil, **opts)
 
         if @prefix # rubocop:disable Style/GuardClause
           @prefix = norm_path(@prefix) + '/'
           mkdir_p abs_path(@prefix)
         end
-        @perm = opts[:perm]
       end
 
       # Lists the contents of a bucket using a glob pattern

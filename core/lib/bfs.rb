@@ -1,4 +1,5 @@
 require 'uri'
+require 'cgi'
 
 module BFS
   class FileInfo < Hash

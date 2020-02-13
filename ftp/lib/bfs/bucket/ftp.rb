@@ -1,6 +1,5 @@
 require 'bfs'
 require 'net/ftp/list'
-require 'cgi'
 
 module BFS
   module Bucket

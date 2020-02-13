@@ -1,6 +1,5 @@
 require 'bfs'
 require 'google/cloud/storage'
-require 'cgi'
 
 module BFS
   module Bucket

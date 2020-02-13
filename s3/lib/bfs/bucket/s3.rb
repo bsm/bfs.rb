@@ -1,6 +1,5 @@
 require 'bfs'
 require 'aws-sdk-s3'
-require 'cgi'
 
 module BFS
   module Bucket
