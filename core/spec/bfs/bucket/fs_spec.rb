@@ -17,7 +17,14 @@ RSpec.describe BFS::Bucket::FS do
     expect(bucket.ls.to_a).to eq(['test.txt'])
   end
 
-  it 'should support custom perms' do
+  it 'should support custom perms on #initialize' do
+    blob = BFS::Blob.new("file://#{tmpdir}/test.txt?perm=0666")
+    blob.create {|w| w.write 'foo' }
+    expect(blob.info.mode).to eq(0o666)
+    blob.close
+  end
+
+  it 'should support custom perms on #create' do
     blob = BFS::Blob.new("file://#{tmpdir}/test.txt")
     blob.create(perm: 0o666) {|w| w.write 'foo' }
     expect(blob.info.mode).to eq(0o666)

@@ -9,9 +9,15 @@ module BFS
       # @param [Hash] opts options
       # @option opts [String] :encoding Custom encoding. Default: Encoding.default_external.
       # @option opts [Integer] :perm optional file permissions. Default: 0600.
-      def initialize(encoding: Encoding.default_external, **_opts)
+      def initialize(encoding: Encoding.default_external, perm: nil, **_opts)
         @encoding = encoding
-        @perm = perm
+
+        case perm
+        when Integer
+          @perm = perm
+        when String
+          @perm = perm.to_i(8)
+        end
       end
 
       # Lists the contents of a bucket using a glob pattern
