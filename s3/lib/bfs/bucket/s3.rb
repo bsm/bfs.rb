@@ -126,7 +126,7 @@ module BFS
           key: path,
         )
         @client.delete_object(**opts)
-      rescue Aws::S3::Errors::NoSuchKey, Aws::S3::Errors::NoSuchBucket, Aws::S3::Errors::NotFound # rubocop:disable Lint/SuppressedException
+      rescue Aws::S3::Errors::NoSuchKey, Aws::S3::Errors::NoSuchBucket, Aws::S3::Errors::NotFound
       end
 
       # Copies a file.

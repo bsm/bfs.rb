@@ -81,7 +81,7 @@ module BFS
       def rm(path, **_opts)
         path = norm_path(path)
         @client.delete(path)
-      rescue Net::FTPPermError # rubocop:disable Lint/SuppressedException
+      rescue Net::FTPPermError
       end
 
       # Closes the underlying connection
