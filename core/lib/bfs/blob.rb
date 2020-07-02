@@ -3,6 +3,18 @@ module BFS
   class Blob
     attr_reader :path
 
+    # Behaves like new, but accepts an optional block.
+    # If a block is given, blobs are automatically closed after the block is yielded.
+    def self.open(url)
+      blob = new(url)
+      begin
+        yield blob
+      ensure
+        blob.close
+      end if block_given?
+      blob
+    end
+
     def initialize(url)
       url = url.is_a?(::URI) ? url.dup : URI.parse(url)
       @path = BFS.norm_path(url.path)
