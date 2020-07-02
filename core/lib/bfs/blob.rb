@@ -9,6 +9,8 @@ module BFS
 
       url.path = '/'
       @bucket = BFS.resolve(url)
+
+      BFS.defer(self, :close)
     end
 
     # Info returns the blob info.

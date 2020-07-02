@@ -33,7 +33,7 @@ module BFS
 
       # Lists the contents of a bucket using a glob pattern
       def ls(pattern = '**/*', **opts)
-        prefix = pattern[%r{^[^\*\?\{\}\[\]]+/}]
+        prefix = pattern[%r{^[^*?\{\}\[\]]+/}]
         prefix = File.join(*[@prefix, prefix].compact) if @prefix
 
         opts = opts.merge(bucket: name, prefix: @prefix)
@@ -158,9 +158,10 @@ module BFS
   end
 end
 
-BFS.register('s3') do |url, opts|
+BFS.register('s3') do |url, opts, block|
   prefix = BFS.norm_path(opts[:prefix] || url.path)
   opts[:prefix] = prefix.empty? ? nil : prefix
+  opts = opts.slice(:prefix, :region, :sse, :access_key_id, :secret_access_key, :acl, :storage_class, :encoding)
 
-  BFS::Bucket::S3.new url.host, **opts.slice(:prefix, :region, :sse, :access_key_id, :secret_access_key, :acl, :storage_class, :encoding)
+  BFS::Bucket::S3.open url.host, **opts, &block
 end

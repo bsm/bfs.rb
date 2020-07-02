@@ -31,7 +31,7 @@ module BFS
 
       # Lists the contents of a bucket using a glob pattern
       def ls(pattern = '**/*', **_opts)
-        dir = pattern[%r{^[^\*\?\{\}\[\]]+/}]
+        dir = pattern[%r{^[^*?\{\}\[\]]+/}]
         dir&.chomp!('/')
 
         Enumerator.new do |y|
@@ -114,10 +114,12 @@ module BFS
   end
 end
 
-BFS.register('ftp', 'sftp') do |url, opts|
-  BFS::Bucket::FTP.new url.host, **opts,
-                       username: url.user ? CGI.unescape(url.user) : nil,
-                       password: url.password ? CGI.unescape(url.password) : nil,
-                       port: url.port,
-                       ssl: opts.key?(:ssl) || url.scheme == 'sftp'
+BFS.register('ftp', 'sftp') do |url, opts, block|
+  extra = {
+    username: url.user ? CGI.unescape(url.user) : nil,
+    password: url.password ? CGI.unescape(url.password) : nil,
+    port: url.port,
+    ssl: opts.key?(:ssl) || url.scheme == 'sftp',
+  }
+  BFS::Bucket::FTP.open url.host, **opts, **extra, &block
 end

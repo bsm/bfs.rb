@@ -5,6 +5,18 @@ module BFS
     class Abstract
       attr_reader :encoding, :perm
 
+      # Behaves like new, but accepts an optional block.
+      # If a block is given, buckets are automatically closed after the block is yielded.
+      def self.open(*args, **opts)
+        bucket = new(*args, **opts)
+        begin
+          yield bucket
+        ensure
+          bucket.close
+        end if block_given?
+        bucket
+      end
+
       # Initializes a new bucket
       # @param [Hash] opts options
       # @option opts [String] :encoding Custom encoding. Default: Encoding.default_external.
@@ -18,6 +30,8 @@ module BFS
         when String
           @perm = perm.to_i(8)
         end
+
+        BFS.defer(self, :close)
       end
 
       # Lists the contents of a bucket using a glob pattern
