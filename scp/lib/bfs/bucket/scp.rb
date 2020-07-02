@@ -183,10 +183,10 @@ module BFS
   end
 end
 
-BFS.register('scp', 'ssh') do |url, opts|
+BFS.register('scp', 'ssh') do |url, opts, block|
   opts[:user] ||= CGI.unescape(url.user) if url.user
   opts[:password] ||= CGI.unescape(url.password) if url.password
   opts[:port] ||= url.port if url.port
 
-  BFS::Bucket::SCP.new(url.host, **opts)
+  BFS::Bucket::SCP.open(url.host, **opts, &block)
 end

@@ -3,12 +3,26 @@ module BFS
   class Blob
     attr_reader :path
 
+    # Behaves like new, but accepts an optional block.
+    # If a block is given, blobs are automatically closed after the block is yielded.
+    def self.open(url)
+      blob = new(url)
+      begin
+        yield blob
+      ensure
+        blob.close
+      end if block_given?
+      blob
+    end
+
     def initialize(url)
       url = url.is_a?(::URI) ? url.dup : URI.parse(url)
       @path = BFS.norm_path(url.path)
 
       url.path = '/'
       @bucket = BFS.resolve(url)
+
+      BFS.defer(self, :close)
     end
 
     # Info returns the blob info.
@@ -34,7 +48,7 @@ module BFS
 
     # Shortcut method to read the contents of the blob.
     def read(**opts)
-      open(**opts, &:read)
+      self.open(**opts, &:read)
     end
 
     # Shortcut method to write data to blob.

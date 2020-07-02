@@ -33,7 +33,7 @@ module BFS
 
       # Lists the contents of a bucket using a glob pattern
       def ls(pattern = '**/*', **opts)
-        prefix = pattern[%r{^[^\*\?\{\}\[\]]+/}]
+        prefix = pattern[%r{^[^*?\{\}\[\]]+/}]
         prefix = File.join(*[@prefix, prefix].compact) if @prefix
         opts   = opts.merge(prefix: prefix) if prefix
 
@@ -105,12 +105,15 @@ module BFS
   end
 end
 
-BFS.register('gs') do |url, opts|
+BFS.register('gs') do |url, opts, block|
   prefix = BFS.norm_path(opts.key?(:prefix) ? opts[:prefix] : url.path)
   prefix = nil if prefix.empty?
+  opts   = opts.slice(:project_id, :credentials, :acl)
+  extra  = {
+    prefix: prefix,
+    timeout: opts.key?(:timeout) ? opts[:timeout].to_i : nil,
+    retries: opts.key?(:retries) ? opts[:retries].to_i : nil,
+  }
 
-  BFS::Bucket::GS.new url.host, **opts.slice(:project_id, :credentials, :acl),
-                      prefix: prefix,
-                      timeout: opts.key?(:timeout) ? opts[:timeout].to_i : nil,
-                      retries: opts.key?(:retries) ? opts[:retries].to_i : nil
+  BFS::Bucket::GS.open url.host, **opts, **extra, &block
 end

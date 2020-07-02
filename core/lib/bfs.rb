@@ -40,7 +40,7 @@ module BFS
     end
   end
 
-  def self.resolve(url)
+  def self.resolve(url, &block)
     url = url.is_a?(::URI) ? url.dup : URI.parse(url)
     rsl = @registry[url.scheme]
     raise ArgumentError, "Unable to resolve #{url}, scheme #{url.scheme} is not registered" unless rsl
@@ -49,7 +49,7 @@ module BFS
     CGI.parse(url.query.to_s).each do |key, values|
       opts[key.to_sym] = values.first
     end
-    rsl.call(url, opts)
+    rsl.call(url, opts, block)
   end
 
   def self.norm_path(path)
@@ -63,6 +63,11 @@ module BFS
   def self.norm_mode(mode)
     mode = mode.to_i(8) if mode.is_a?(String)
     mode & 0o000777
+  end
+
+  def self.defer(obj, method)
+    owner = Process.pid
+    ObjectSpace.define_finalizer(obj, ->(*) { obj.send(method) if Process.pid == owner })
   end
 end
 

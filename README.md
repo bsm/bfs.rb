@@ -3,11 +3,20 @@
 [![Build Status](https://travis-ci.org/bsm/bfs.rb.png?branch=master)](https://travis-ci.org/bsm/bfs.rb)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Minimalist abstraction for bucket storage.
+Abstraction for bucket storage.
+
+## Supported backends
+
+* [In-memory](https://rubygems.org/gems/bfs) - for testing
+* [Local file system](https://rubygems.org/gems/bfs) - supports `file://` URLs
+* [(S)FTP](https://rubygems.org/gems/bfs-ftp) - supports `ftp://` and `sftp://` URLs
+* [Google Cloud Storage](https://rubygems.org/gems/bfs-gs) - supports `gs://` URLs
+* [Amazon S3](https://rubygems.org/gems/bfs-s3) - supports `s3://` URLs
+* [SCP](https://rubygems.org/gems/bfs-scp) - supports `scp://` URLs
 
 ## Installation
 
-Add this to your Gemfile:
+Add this to your Gemfile, e.g. for S3 support:
 
 ```ruby
 gem 'bfs-s3'
@@ -39,4 +48,19 @@ end
 
 # delete that file
 bucket.rm 'path/to/file.txt'
+
+# close the bucket again
+bucket.close
+```
+
+Or, as a block:
+
+```ruby
+require 'bfs/fs'
+
+BFS.resolve('file:///absolute/path') do |bucket|
+  bucket.ls('**').each do |file|
+    puts file
+  end
+end
 ```

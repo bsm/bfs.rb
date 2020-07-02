@@ -102,7 +102,7 @@ module BFS
   end
 end
 
-BFS.register('file') do |url, opts|
+BFS.register('file') do |url, opts, block|
   parts = [url.host, url.path].compact
-  BFS::Bucket::FS.new File.join(*parts), **opts
+  BFS::Bucket::FS.open(File.join(*parts), **opts, &block)
 end
