@@ -65,7 +65,7 @@ module BFS
       # @param [String] path The path to read from.
       # @param [Hash] opts Additional options, see #open.
       def read(path, **opts)
-        open(path, **opts, &:read)
+        self.open(path, **opts, &:read)
       end
 
       # Shortcut method to write data to path
@@ -82,7 +82,7 @@ module BFS
       # @param [String] src The source path.
       # @param [String] dst The destination path.
       def cp(src, dst, **opts)
-        open(src, **opts) do |r|
+        self.open(src, **opts) do |r|
           create(dst, **opts) do |w|
             IO.copy_stream(r, w)
           end

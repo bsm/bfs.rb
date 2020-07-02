@@ -36,7 +36,7 @@ module BFS
 
     # Shortcut method to read the contents of the blob.
     def read(**opts)
-      open(**opts, &:read)
+      self.open(**opts, &:read)
     end
 
     # Shortcut method to write data to blob.
