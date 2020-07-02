@@ -13,10 +13,12 @@ RSpec.describe BFS::Bucket::Abstract do
     end
 
     bucket = nil
-    sub_class.open do |bkt|
+    result = sub_class.open do |bkt|
       expect(bkt).not_to be_closed
       bucket = bkt
+      21
     end
+    expect(result).to eq(21)
     expect(bucket).to be_instance_of(sub_class)
     expect(bucket).to be_closed
   end

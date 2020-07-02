@@ -9,12 +9,13 @@ module BFS
       # If a block is given, buckets are automatically closed after the block is yielded.
       def self.open(*args, **opts)
         bucket = new(*args, **opts)
+        return bucket unless block_given?
+
         begin
           yield bucket
         ensure
           bucket.close
-        end if block_given?
-        bucket
+        end
       end
 
       # Initializes a new bucket

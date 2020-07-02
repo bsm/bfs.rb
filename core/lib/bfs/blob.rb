@@ -7,12 +7,13 @@ module BFS
     # If a block is given, blobs are automatically closed after the block is yielded.
     def self.open(url)
       blob = new(url)
+      return blob unless block_given?
+
       begin
         yield blob
       ensure
         blob.close
-      end if block_given?
-      blob
+      end
     end
 
     def initialize(url)
