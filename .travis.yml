@@ -10,3 +10,5 @@ before_install:
   - docker run -d -p 7022:22 sickp/alpine-sshd:7.5-r2
   - gem install bundler
 cache: bundler
+env:
+  - SPEC_OPTS="--tag ~gs --tag ~s3"

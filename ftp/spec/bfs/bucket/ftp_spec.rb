@@ -1,17 +1,8 @@
 require 'spec_helper'
 
-sandbox  = { host: '127.0.0.1', port: 7021, username: 'ftpuser', password: 'ftppass' }.freeze
-run_spec = \
-  begin
-    ftp = Net::FTP.new sandbox[:host], sandbox
-    ftp.list
-    ftp.close
-  rescue Errno::ECONNREFUSED, Net::FTPError => e
-    warn "WARNING: unable to run #{File.basename __FILE__}: #{e.message}"
-    false
-  end
+sandbox = { host: '127.0.0.1', port: 7021, username: 'ftpuser', password: 'ftppass' }.freeze
 
-RSpec.describe BFS::Bucket::FTP, if: run_spec do
+RSpec.describe BFS::Bucket::FTP, ftp: true do
   subject { described_class.new sandbox[:host], **sandbox.merge(prefix: SecureRandom.uuid) }
   after   { subject.close }
 
@@ -22,5 +13,12 @@ RSpec.describe BFS::Bucket::FTP, if: run_spec do
   it 'should resolve from URL' do
     bucket = BFS.resolve('ftp://ftpuser:ftppass@127.0.0.1:7021')
     expect(bucket).to be_instance_of(described_class)
+    expect(bucket.instance_variable_get(:@client).pwd).to eq('/ftp/ftpuser')
+    bucket.close
+
+    bucket = BFS.resolve('ftp://ftpuser:ftppass@127.0.0.1:7021/a/b/')
+    expect(bucket).to be_instance_of(described_class)
+    expect(bucket.instance_variable_get(:@client).pwd).to eq('/ftp/ftpuser/a/b')
+    bucket.close
   end
 end

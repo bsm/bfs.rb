@@ -1,17 +1,8 @@
 require 'spec_helper'
 
-sandbox  = { bucket: 'bsm-bfs-unittest' }.freeze
-run_spec = \
-  begin
-    s = Aws::S3::Client.new
-    s.head_bucket(bucket: sandbox[:bucket])
-    true
-  rescue StandardError => e
-    warn "WARNING: unable to run #{File.basename __FILE__}: #{e.message}"
-    false
-  end
+sandbox = { bucket: 'bsm-bfs-unittest' }.freeze
 
-RSpec.describe BFS::Bucket::S3, if: run_spec do
+RSpec.describe BFS::Bucket::S3, s3: true do
   let(:prefix) { "x/#{SecureRandom.uuid}/" }
 
   subject do
@@ -31,15 +22,18 @@ RSpec.describe BFS::Bucket::S3, if: run_spec do
     expect(bucket.acl).to eq(:private)
     expect(bucket.encoding).to eq('binary')
     expect(bucket.instance_variable_get(:@prefix)).to be_nil
+    bucket.close
 
     bucket = BFS.resolve("s3://#{sandbox[:bucket]}/a/b/")
     expect(bucket).to be_instance_of(described_class)
     expect(bucket.name).to eq(sandbox[:bucket])
     expect(bucket.instance_variable_get(:@prefix)).to eq('a/b')
+    bucket.close
   end
 
   it 'should enumerate over a large number of files' do
     bucket = described_class.new sandbox[:bucket], prefix: 'm/'
     expect(bucket.ls('**/*').count).to eq(2121)
+    bucket.close
   end
 end

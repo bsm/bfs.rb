@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe BFS::Blob do
+RSpec.describe BFS::Blob, core: true do
   describe 'default' do
     let(:bucket) { BFS::Bucket::InMem.new }
     before       { allow(BFS).to receive(:resolve).and_return(bucket) }

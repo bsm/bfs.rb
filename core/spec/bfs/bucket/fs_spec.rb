@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe BFS::Bucket::FS do
+RSpec.describe BFS::Bucket::FS, core: true do
   let(:tmpdir) { Dir.mktmpdir }
   after   { FileUtils.rm_rf tmpdir }
   subject { described_class.new(tmpdir) }
@@ -15,6 +15,7 @@ RSpec.describe BFS::Bucket::FS do
     bucket = BFS.resolve("file://#{tmpdir}")
     expect(bucket).to be_instance_of(described_class)
     expect(bucket.ls.to_a).to eq(['test.txt'])
+    bucket.close
   end
 
   it 'should support custom perms on #initialize' do
