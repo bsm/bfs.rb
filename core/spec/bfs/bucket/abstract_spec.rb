@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe BFS::Bucket::Abstract do
+RSpec.describe BFS::Bucket::Abstract, core: true do
   it 'should open with a block' do
     sub_class = Class.new(described_class) do
       def close

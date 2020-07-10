@@ -115,6 +115,9 @@ module BFS
 end
 
 BFS.register('ftp', 'sftp') do |url, opts, block|
+  prefix = BFS.norm_path(opts[:prefix] || url.path)
+  opts[:prefix] = prefix unless prefix.empty?
+
   extra = {
     username: url.user ? CGI.unescape(url.user) : nil,
     password: url.password ? CGI.unescape(url.password) : nil,

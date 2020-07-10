@@ -6,17 +6,9 @@ module Google::Auth::CredentialsLoader
   module_function :warn_if_cloud_sdk_credentials # rubocop:disable Style/AccessModifierDeclarations
 end
 
-sandbox  = { project: 'bogus', bucket: 'bsm-bfs-unittest' }.freeze
-run_spec = \
-  begin
-    s = Google::Cloud::Storage.new(project_id: sandbox[:project])
-    !s.bucket(sandbox[:bucket]).nil?
-  rescue Signet::AuthorizationError => e
-    warn "WARNING: unable to run #{File.basename __FILE__}: #{e.message}"
-    false
-  end
+sandbox = { project: 'bogus', bucket: 'bsm-bfs-unittest' }.freeze
 
-RSpec.describe BFS::Bucket::GS, if: run_spec do
+RSpec.describe BFS::Bucket::GS, gs: true do
   let(:prefix) { "x/#{SecureRandom.uuid}/" }
 
   subject do
@@ -34,15 +26,18 @@ RSpec.describe BFS::Bucket::GS, if: run_spec do
     expect(bucket).to be_instance_of(described_class)
     expect(bucket.name).to eq(sandbox[:bucket])
     expect(bucket.instance_variable_get(:@prefix)).to be_nil
+    bucket.close
 
     bucket = BFS.resolve("gs://#{sandbox[:bucket]}/a/b/")
     expect(bucket).to be_instance_of(described_class)
     expect(bucket.name).to eq(sandbox[:bucket])
     expect(bucket.instance_variable_get(:@prefix)).to eq('a/b')
+    bucket.close
   end
 
   it 'should enumerate over a large number of files' do
     bucket = described_class.new sandbox[:bucket], project_id: sandbox[:project], prefix: 'm/'
     expect(bucket.ls('**/*').count).to eq(2121)
+    bucket.close
   end
 end

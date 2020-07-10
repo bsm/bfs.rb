@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe BFS do
+RSpec.describe BFS, core: true do
   it 'should resolve' do
     bucket = BFS.resolve("file://#{Dir.tmpdir}")
     expect(bucket).to be_instance_of(BFS::Bucket::FS)

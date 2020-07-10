@@ -184,6 +184,8 @@ module BFS
 end
 
 BFS.register('scp', 'ssh') do |url, opts, block|
+  prefix = BFS.norm_path(opts[:prefix] || url.path)
+  opts[:prefix] = prefix unless prefix.empty?
   opts[:user] ||= CGI.unescape(url.user) if url.user
   opts[:password] ||= CGI.unescape(url.password) if url.password
   opts[:port] ||= url.port if url.port

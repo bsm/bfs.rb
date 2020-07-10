@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe BFS::TempWriter do
+RSpec.describe BFS::TempWriter, core: true do
   let(:closer) { proc {} }
   subject { described_class.new 'test', &closer }
 
