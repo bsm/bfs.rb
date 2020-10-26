@@ -4,6 +4,8 @@ require 'cgi'
 module BFS
   class FileInfo < Hash
     def initialize(**attrs)
+      super(nil)
+
       update(size: 0, mtime: Time.at(0), mode: 0, metadata: {})
       update(attrs)
     end
@@ -36,7 +38,20 @@ module BFS
   def self.register(*schemes, &resolver)
     @registry ||= {}
     schemes.each do |scheme|
+      scheme = scheme.to_s
+      raise(ArgumentError, "scheme #{scheme} is already registered") if @registry.key?(scheme)
+
       @registry[scheme] = resolver
+    end
+  end
+
+  def self.unregister(*schemes)
+    @registry ||= {}
+    schemes.each do |scheme|
+      scheme = scheme.to_s
+      raise(ArgumentError, "scheme #{scheme} is not registered") unless @registry.key?(scheme)
+
+      @registry.delete(scheme)
     end
   end
 

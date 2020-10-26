@@ -35,7 +35,7 @@ module BFS
         @client = Net::SCP.start(host, nil, **opts.slice(*Net::SSH::VALID_OPTIONS))
 
         if @prefix # rubocop:disable Style/GuardClause
-          @prefix = norm_path(@prefix) + '/'
+          @prefix = "#{norm_path(@prefix)}/"
           mkdir_p abs_path(@prefix)
         end
       end
