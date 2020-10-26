@@ -36,7 +36,20 @@ module BFS
   def self.register(*schemes, &resolver)
     @registry ||= {}
     schemes.each do |scheme|
+      scheme = scheme.to_s
+      raise(ArgumentError, "scheme #{scheme} is already registered") if @registry.key?(scheme)
+
       @registry[scheme] = resolver
+    end
+  end
+
+  def self.unregister(*schemes)
+    @registry ||= {}
+    schemes.each do |scheme|
+      scheme = scheme.to_s
+      raise(ArgumentError, "scheme #{scheme} is not registered") unless @registry.key?(scheme)
+
+      @registry.delete(scheme)
     end
   end
 
