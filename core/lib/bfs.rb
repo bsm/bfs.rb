@@ -4,6 +4,8 @@ require 'cgi'
 module BFS
   class FileInfo < Hash
     def initialize(**attrs)
+      super(nil)
+
       update(size: 0, mtime: Time.at(0), mode: 0, metadata: {})
       update(attrs)
     end
