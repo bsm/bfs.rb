@@ -72,17 +72,10 @@ module BFS
         full = full_path(path)
 
         opts[:preserve] = true if perm && !opts.key?(:preserve)
-        temp = BFS::TempWriter.new(path, encoding: encoding, perm: perm) do |temp_path|
+        BFS::TempWriter.new(path, encoding: encoding, perm: perm) do |temp_path|
           mkdir_p File.dirname(full)
           @client.upload!(temp_path, full, **opts)
-        end
-        return temp unless block
-
-        begin
-          yield temp
-        ensure
-          temp.close
-        end
+        end.perform(&block)
       end
 
       # Opens an existing file for reading

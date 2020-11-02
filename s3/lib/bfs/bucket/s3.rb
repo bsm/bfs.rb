@@ -82,18 +82,11 @@ module BFS
         opts[:server_side_encryption] ||= @sse if @sse
         opts[:storage_class] ||= @storage_class if @storage_class
 
-        temp = BFS::TempWriter.new(path, encoding: encoding, perm: perm) do |t|
+        BFS::TempWriter.new(path, encoding: encoding, perm: perm) do |t|
           File.open(t, encoding: encoding) do |file|
             @client.put_object(opts.merge(body: file))
           end
-        end
-        return temp unless block
-
-        begin
-          yield temp
-        ensure
-          temp.close
-        end
+        end.perform(&block)
       end
 
       # Opens an existing file for reading

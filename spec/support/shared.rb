@@ -85,8 +85,20 @@ RSpec.shared_examples 'a bucket' do |features|
     expect(info.mode).to eq(0).or eq(0o644)
   end
 
-  it 'should raise FileNotFound if not foudn on read' do
+  it 'should raise FileNotFound if not found on read' do
     expect { subject.read('not/found.txt') }.to raise_error(BFS::FileNotFound)
+  end
+
+  it 'should gracefully abort on errors' do
+    expect do
+      subject.create('x.txt') do |io|
+        io.write 'TEST'
+        raise 'doh!'
+        io.write 'DATA'
+      end
+    end.to raise_error(RuntimeError, 'doh!')
+
+    expect { subject.read('x.txt') }.to raise_error(BFS::FileNotFound)
   end
 
   it 'should remove' do
