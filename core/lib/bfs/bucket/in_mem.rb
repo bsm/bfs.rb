@@ -7,6 +7,36 @@ module BFS
     class InMem < Abstract
       Entry = Struct.new(:io, :mtime, :content_type, :metadata)
 
+      class Writer < DelegateClass(::StringIO)
+        def initialize(encoding:, &closer)
+          @closer = closer
+
+          sio = StringIO.new
+          sio.set_encoding(encoding)
+          super sio
+        end
+
+        def close
+          close!
+          @closer&.call(self)
+        end
+
+        def close!
+          __getobj__.close
+        end
+
+        def perform(&block)
+          return self unless block
+
+          begin
+            yield self
+            close
+          ensure
+            close!
+          end
+        end
+      end
+
       def initialize(**opts)
         super(**opts.dup)
         @files = {}
@@ -43,18 +73,9 @@ module BFS
       # @option opts [String] :content_type Custom content type.
       # @option opts [Hash] :metadata Metadata key-value pairs.
       def create(path, encoding: self.encoding, content_type: nil, metadata: nil, **_opts, &block)
-        io = StringIO.new
-        io.set_encoding(encoding)
-
-        entry = Entry.new(io, Time.now, content_type, norm_meta(metadata))
-        @files[norm_path(path)] = entry
-        return io unless block
-
-        begin
-          yield(io)
-        ensure
-          io.close
-        end
+        Writer.new(encoding: encoding) do |wio|
+          @files[norm_path(path)] = Entry.new(wio, Time.now, content_type, norm_meta(metadata))
+        end.perform(&block)
       end
 
       # Opens an existing file for reading

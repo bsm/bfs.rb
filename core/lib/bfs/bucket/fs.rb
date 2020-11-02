@@ -42,14 +42,9 @@ module BFS
         full = @root.join(norm_path(path))
         FileUtils.mkdir_p(full.dirname.to_s)
 
-        temp = BFS::TempWriter.new(full, encoding: encoding, perm: perm) {|t| FileUtils.mv t, full.to_s }
-        return temp unless block
-
-        begin
-          yield temp
-        ensure
-          temp.close
-        end
+        BFS::TempWriter.new(full, encoding: encoding, perm: perm) do |temp|
+          FileUtils.mv temp, full.to_s
+        end.perform(&block)
       end
 
       # Opens an existing file for reading

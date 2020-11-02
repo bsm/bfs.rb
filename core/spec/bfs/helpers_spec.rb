@@ -19,4 +19,9 @@ RSpec.describe BFS::TempWriter, core: true do
     expect(closer).to receive(:call).with(subject.path)
     expect(subject.close).to be_truthy
   end
+
+  it 'may skip closer block' do
+    expect(closer).not_to receive(:call)
+    expect(subject.close!).to be_truthy
+  end
 end
