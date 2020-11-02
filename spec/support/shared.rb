@@ -92,9 +92,8 @@ RSpec.shared_examples 'a bucket' do |features|
   it 'should gracefully abort on errors' do
     expect do
       subject.create('x.txt') do |io|
-        io.write 'TEST'
+        io.write 'TESTDATA'
         raise 'doh!'
-        io.write 'DATA'
       end
     end.to raise_error(RuntimeError, 'doh!')
 
