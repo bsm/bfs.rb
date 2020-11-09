@@ -17,16 +17,17 @@ module BFS
         end
 
         def close
-          close!
-          @closer&.call(self)
+          super.tap do
+            @closer&.call(self)
+          end
         end
 
         def close!
           __getobj__.close
         end
 
-        def perform(&block)
-          return self unless block
+        def perform
+          return self unless block_given?
 
           begin
             yield self

@@ -11,8 +11,8 @@ module BFS
       super tempfile
     end
 
-    def perform(&block)
-      return self unless block
+    def perform
+      return self unless block_given?
 
       begin
         yield self
@@ -25,12 +25,10 @@ module BFS
     def close
       return if closed?
 
-      tempfile = __getobj__
-      tempfile.close
-      @closer&.call(tempfile.path)
-      true
-    ensure
-      tempfile.unlink
+      super.tap do
+        @closer&.call(path)
+      end
+      unlink
     end
   end
 end
