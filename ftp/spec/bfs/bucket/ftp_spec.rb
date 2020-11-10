@@ -1,9 +1,10 @@
 require 'spec_helper'
 
-sandbox = { host: '127.0.0.1', port: 7021, username: 'ftpuser', password: 'ftppass' }.freeze
-
 RSpec.describe BFS::Bucket::FTP, ftp: true do
-  subject { described_class.new sandbox[:host], **sandbox.merge(prefix: SecureRandom.uuid) }
+  let(:hostname) { '127.0.0.1' }
+  let(:conn_opts) { { port: 7021, username: 'ftpuser', password: 'ftppass', prefix: SecureRandom.uuid } }
+
+  subject { described_class.new hostname, **conn_opts }
   after   { subject.close }
 
   it_behaves_like 'a bucket',

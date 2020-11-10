@@ -1,38 +1,39 @@
 require 'spec_helper'
 
-sandbox = { bucket: 'bsm-bfs-unittest' }.freeze
+bucket_name = 'bsm-bfs-unittest'
 
 RSpec.describe BFS::Bucket::S3, s3: true do
   let(:prefix) { "x/#{SecureRandom.uuid}/" }
 
   subject do
-    described_class.new sandbox[:bucket], prefix: prefix
+    described_class.new bucket_name, prefix: prefix
   end
+
   after :all do
-    bucket = described_class.new sandbox[:bucket], prefix: 'x/'
+    bucket = described_class.new bucket_name, prefix: 'x/'
     bucket.ls.each {|name| bucket.rm(name) }
   end
 
   it_behaves_like 'a bucket'
 
   it 'should resolve from URL' do
-    bucket = BFS.resolve("s3://#{sandbox[:bucket]}/?acl=private&encoding=binary")
+    bucket = BFS.resolve("s3://#{bucket_name}/?acl=private&encoding=binary")
     expect(bucket).to be_instance_of(described_class)
-    expect(bucket.name).to eq(sandbox[:bucket])
+    expect(bucket.name).to eq(bucket_name)
     expect(bucket.acl).to eq(:private)
     expect(bucket.encoding).to eq('binary')
     expect(bucket.instance_variable_get(:@prefix)).to be_nil
     bucket.close
 
-    bucket = BFS.resolve("s3://#{sandbox[:bucket]}/a/b/")
+    bucket = BFS.resolve("s3://#{bucket_name}/a/b/")
     expect(bucket).to be_instance_of(described_class)
-    expect(bucket.name).to eq(sandbox[:bucket])
+    expect(bucket.name).to eq(bucket_name)
     expect(bucket.instance_variable_get(:@prefix)).to eq('a/b')
     bucket.close
   end
 
   it 'should enumerate over a large number of files' do
-    bucket = described_class.new sandbox[:bucket], prefix: 'm/'
+    bucket = described_class.new bucket_name, prefix: 'm/'
     expect(bucket.ls('**/*').count).to eq(2121)
     bucket.close
   end

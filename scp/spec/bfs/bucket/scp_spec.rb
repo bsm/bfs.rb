@@ -1,18 +1,19 @@
 require 'spec_helper'
 
-sandbox = { host: '127.0.0.1', opts: { port: 7022, user: 'root', password: 'root' } }.freeze
-
 RSpec.describe BFS::Bucket::SCP, scp: true do
-  context 'absolute' do
-    subject { described_class.new sandbox[:host], **sandbox[:opts].merge(prefix: SecureRandom.uuid) }
-    after   { subject.close }
+  let(:hostname) { '127.0.0.1' }
+  let(:conn_opts) { { port: 7022, user: 'root', password: 'root', prefix: prefix } }
+  let(:prefix) { SecureRandom.uuid }
 
+  subject { described_class.new hostname, **conn_opts }
+  after { subject.close }
+
+  context 'absolute' do
     it_behaves_like 'a bucket', content_type: false, metadata: false
   end
 
   context 'relative' do
-    subject { described_class.new sandbox[:host], **sandbox[:opts].merge(prefix: "~/#{SecureRandom.uuid}") }
-    after   { subject.close }
+    let(:prefix) { "~/#{SecureRandom.uuid}" }
 
     it_behaves_like 'a bucket', content_type: false, metadata: false
   end

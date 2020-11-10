@@ -15,9 +15,10 @@ RSpec.describe BFS::TempWriter, core: true do
     expect(subject.close).to be_truthy
   end
 
-  it 'should exectute a closer block' do
-    expect(closer).to receive(:call).with(subject.path)
+  it 'should execute a closer block' do
+    expect(closer).to receive(:call).with(subject.path).once
     expect(subject.close).to be_truthy
+    expect(subject.close).to be_nil
   end
 
   it 'may skip closer block' do
