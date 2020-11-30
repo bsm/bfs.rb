@@ -1,5 +1,6 @@
 require 'bfs'
 require 'stringio'
+require 'delegate'
 
 module BFS
   module Bucket
@@ -8,34 +9,18 @@ module BFS
       Entry = Struct.new(:io, :mtime, :content_type, :metadata)
 
       class Writer < DelegateClass(::StringIO)
-        def initialize(encoding:, &closer)
-          @closer = closer
+        include BFS::Writer::Mixin
+
+        def initialize(encoding:, &on_commit)
+          @on_commit = on_commit
 
           sio = StringIO.new
           sio.set_encoding(encoding)
           super sio
         end
 
-        def close
-          super.tap do
-            @closer&.call(self)
-          end
-        end
-
-        def close!
-          __getobj__.close
-        end
-
-        def perform
-          return self unless block_given?
-
-          begin
-            yield self
-            close
-          ensure
-            close!
-          end
-        end
+        alias close! close
+        alias commit_ref __getobj__
       end
 
       def initialize(**opts)

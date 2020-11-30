@@ -32,6 +32,9 @@ module BFS
     end
 
     # Creates the blob and opens it for writing.
+    # If a block is passed the writer is automatically committed in the end.
+    # If no block is passed, you must manually call #commit to persist the
+    # result.
     def create(**opts, &block)
       @bucket.create(path, **opts, &block)
     end

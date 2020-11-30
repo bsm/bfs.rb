@@ -42,7 +42,7 @@ module BFS
         full = @root.join(norm_path(path))
         FileUtils.mkdir_p(full.dirname.to_s)
 
-        BFS::TempWriter.new(full, encoding: encoding, perm: perm) do |temp|
+        BFS::Writer.new(full, encoding: encoding, perm: perm) do |temp|
           FileUtils.mv temp, full.to_s
         end.perform(&block)
       end
