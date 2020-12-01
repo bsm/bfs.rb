@@ -59,7 +59,7 @@ module BFS
       def create(path, encoding: self.encoding, perm: self.perm, **opts, &block)
         opts[:metadata] = norm_meta(opts[:metadata])
         path = full_path(path)
-        BFS::TempWriter.new(path, encoding: encoding, perm: perm) do |t|
+        BFS::Writer.new(path, encoding: encoding, perm: perm) do |t|
           File.open(t, encoding: encoding) do |file|
             @bucket.create_file(file, path, **opts)
           end

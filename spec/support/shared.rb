@@ -63,7 +63,7 @@ RSpec.shared_examples 'a bucket' do |features|
   it 'should write/read (iterative)' do
     w = subject.create('y.txt')
     w.write('DATA-y')
-    w.close
+    w.commit
 
     r = subject.open('y.txt')
     expect(r.read).to eq('DATA-y')
@@ -73,7 +73,7 @@ RSpec.shared_examples 'a bucket' do |features|
   it 'should write/read (custom encoding + perm)' do
     w = subject.create('y.txt', encoding: 'iso-8859-15', perm: 0o644)
     w.write('DATA-y')
-    w.close
+    w.commit
 
     r = subject.open('y.txt', encoding: 'iso-8859-15')
     data = r.read

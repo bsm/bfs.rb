@@ -72,7 +72,7 @@ module BFS
         full = full_path(path)
 
         opts[:preserve] = true if perm && !opts.key?(:preserve)
-        BFS::TempWriter.new(path, encoding: encoding, perm: perm) do |temp_path|
+        BFS::Writer.new(path, encoding: encoding, perm: perm) do |temp_path|
           mkdir_p File.dirname(full)
           @client.upload!(temp_path, full, **opts)
         end.perform(&block)

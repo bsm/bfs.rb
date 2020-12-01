@@ -52,7 +52,7 @@ module BFS
       # Creates a new file and opens it for writing
       def create(path, encoding: self.encoding, perm: self.perm, **_opts, &block)
         path = norm_path(path)
-        BFS::TempWriter.new(path, encoding: encoding, perm: perm) do |t|
+        BFS::Writer.new(path, encoding: encoding, perm: perm) do |t|
           mkdir_p File.dirname(path)
           @client.put(t, path)
         end.perform(&block)
