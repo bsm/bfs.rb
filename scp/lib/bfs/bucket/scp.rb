@@ -145,19 +145,17 @@ module BFS
       end
 
       def sh!(*cmd) # rubocop:disable Metrics/MethodLength
-        stdout = ''
         stderr = nil
         status = 0
         cmdstr = cmd.map {|x| Shellwords.escape(x) }.join(' ')
 
+        # init command's STDOUT stream (large output may break lines in on_data):
+        stdout_reader, stdout_writer = IO.pipe
+
         @client.session.open_channel do |ch|
           ch.exec(cmdstr) do |_, _success|
             ch.on_data do |_, data|
-              if block_given?
-                yield data
-              else
-                stdout += data
-              end
+              stdout_writer.write(data)
             end
             ch.on_extended_data do |_, _, data|
               stderr = data
@@ -165,12 +163,35 @@ module BFS
             ch.on_request('exit-status') do |_, buf|
               status = buf.read_long
             end
+            ch.on_close do |_|
+              stdout_writer.close
+            end
           end
         end
-        @client.session.loop
+
+        # loop in background (blocking to be done by consumer):
+        loop_thread = Thread.new { @client.session.loop }
+
+        # consume command's STDOUT (blocking):
+        stdout = ''
+        if block_given?
+          # pass command's STDOUT to caller for reading (slurping or iterating lines etc):
+          yield stdout_reader
+        else
+          # or just slurp command's STDOUT into retval (`read(length=nil)` == "read until EOF"):
+          stdout = stdout_reader.read
+        end
+
+        # wait for completion:
+        loop_thread.join
+
+        # raise error if command completed with error:
         raise CommandError.new(cmdstr, status, stderr) unless status.zero?
 
         stdout
+      ensure
+        stdout_writer&.close
+        stdout_reader&.close
       end
     end
   end
