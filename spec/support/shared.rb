@@ -14,7 +14,7 @@ RSpec.shared_examples 'a bucket' do |features|
     subject.close
   end
 
-  it 'should ls' do
+  it 'lses' do
     expect(subject.ls).to be_a(Enumerator)
     expect(subject.ls.to_a).to match_array [
       'a/b.txt',
@@ -31,7 +31,7 @@ RSpec.shared_examples 'a bucket' do |features|
     expect(subject.ls('x/**').to_a).to be_empty
   end
 
-  it 'should return info' do
+  it 'returns info' do
     info = subject.info('/a/b/c.txt')
     expect(info.path).to eq('a/b/c.txt')
     expect(info.size).to eq(10)
@@ -43,7 +43,7 @@ RSpec.shared_examples 'a bucket' do |features|
     expect { subject.info('missing.txt') }.to raise_error(BFS::FileNotFound)
   end
 
-  it 'should write/read' do
+  it 'write/reads' do
     expect(subject.read('a/b.txt')).to eq('TESTDATA-b')
     expect(subject.read('/a/b.txt')).to eq('TESTDATA-b')
     subject.write('a/b.txt', 'NEWDATA')
@@ -53,14 +53,14 @@ RSpec.shared_examples 'a bucket' do |features|
     expect(data.encoding).to eq(Encoding.default_external)
   end
 
-  it 'should write/read (block)' do
+  it 'write/reads (block)' do
     subject.create('x.txt') {|io| io.write 'DATA-x' }
     read = nil
     subject.open('x.txt') {|io| read = io.gets }
     expect(read).to eq('DATA-x')
   end
 
-  it 'should write/read (iterative)' do
+  it 'write/reads (iterative)' do
     w = subject.create('y.txt')
     w.write('DATA-y')
     w.commit
@@ -70,7 +70,7 @@ RSpec.shared_examples 'a bucket' do |features|
     r.close
   end
 
-  it 'should write/read (custom encoding + perm)' do
+  it 'write/reads (custom encoding + perm)' do
     w = subject.create('y.txt', encoding: 'iso-8859-15', perm: 0o644)
     w.write('DATA-y')
     w.commit
@@ -85,11 +85,11 @@ RSpec.shared_examples 'a bucket' do |features|
     expect(info.mode).to eq(0).or eq(0o644)
   end
 
-  it 'should raise FileNotFound if not found on read' do
+  it 'raises FileNotFound if not found on read' do
     expect { subject.read('not/found.txt') }.to raise_error(BFS::FileNotFound)
   end
 
-  it 'should gracefully abort on errors' do
+  it 'gracefullies abort on errors' do
     expect do
       subject.create('x.txt') do |io|
         io.write 'TESTDATA'
@@ -100,7 +100,7 @@ RSpec.shared_examples 'a bucket' do |features|
     expect { subject.read('x.txt') }.to raise_error(BFS::FileNotFound)
   end
 
-  it 'should remove' do
+  it 'removes' do
     subject.rm('a/b/c.txt')
     subject.rm('not/found.txt')
     expect(subject.ls).to match_array [
@@ -110,7 +110,7 @@ RSpec.shared_examples 'a bucket' do |features|
     ]
   end
 
-  it 'should copy' do
+  it 'copies' do
     subject.cp('a/b/c.txt', 'x.txt')
     expect(subject.ls.count).to eq(5)
     expect(subject.read('x.txt')).to eq('TESTDATA-c')
@@ -118,7 +118,7 @@ RSpec.shared_examples 'a bucket' do |features|
     expect { subject.cp('missing.txt', 'x.txt') }.to raise_error(BFS::FileNotFound)
   end
 
-  it 'should move' do
+  it 'moves' do
     subject.mv('a/b/c.txt', 'x.txt')
     expect(subject.ls.count).to eq(4)
     expect(subject.read('x.txt')).to eq('TESTDATA-c')

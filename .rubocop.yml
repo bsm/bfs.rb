@@ -1,9 +1,19 @@
-require: rubocop-performance
-inherit_from:
-  - https://gitlab.com/bsm/misc/raw/master/rubocop/default.yml
+inherit_gem:
+  rubocop-bsm:
+    - default.yml
+inherit_mode:
+  merge:
+    - Exclude
 
 AllCops:
   TargetRubyVersion: "2.6"
 
 Metrics/ParameterLists:
   Max: 8
+
+RSpec/FilePath:
+  Exclude:
+    - core/spec/bfs/helpers_spec.rb
+
+RSpec/MessageSpies:
+  Enabled: false

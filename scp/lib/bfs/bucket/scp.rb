@@ -153,10 +153,11 @@ module BFS
         @client.session.open_channel do |ch|
           ch.exec(cmdstr) do |_, _success|
             ch.on_data do |_, data|
+              stdout << data
+
               if block_given?
-                yield data
-              else
-                stdout += data
+                pos = stdout.rindex("\n")
+                yield stdout.slice!(0..pos) if pos
               end
             end
             ch.on_extended_data do |_, _, data|
@@ -167,6 +168,12 @@ module BFS
             end
           end
         end
+
+        if block_given? && stdout.length.positive?
+          yield stdout
+          stdout.clear
+        end
+
         @client.session.loop
         raise CommandError.new(cmdstr, status, stderr) unless status.zero?
 
