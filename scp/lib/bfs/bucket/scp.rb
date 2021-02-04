@@ -157,7 +157,7 @@ module BFS
 
               if block_given?
                 pos = stdout.rindex("\n")
-                yield stdout.slice!(..pos) if pos
+                yield stdout.slice!(0..pos) if pos
               end
             end
             ch.on_extended_data do |_, _, data|
@@ -169,7 +169,7 @@ module BFS
           end
         end
 
-        if block_given? && stdout.length > 0
+        if block_given? && stdout.length.positive?
           yield stdout
           stdout = ''
         end
