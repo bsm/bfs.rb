@@ -14,3 +14,6 @@ Metrics/ParameterLists:
 RSpec/FilePath:
   Exclude:
     - core/spec/bfs/helpers_spec.rb
+
+RSpec/MessageSpies:
+  Enabled: false

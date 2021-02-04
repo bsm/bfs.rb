@@ -12,18 +12,18 @@ RSpec.describe BFS::Writer, core: true do
   end
 
   it 'executes a on_commit block' do
-    expect(on_commit).to have_received(:call).with(subject.path).once
+    expect(on_commit).to receive(:call).with(subject.path).once
     expect(subject.commit).to be(true)
     expect(subject.commit).to be(false)
   end
 
   it 'may skip on_commit block' do
-    expect(on_commit).not_to have_received(:call)
+    expect(on_commit).not_to receive(:call)
     expect(subject.discard).to be(true)
   end
 
   it 'does not auto-commit on close' do
-    expect(on_commit).not_to have_received(:call)
+    expect(on_commit).not_to receive(:call)
     expect(subject.close).to be_nil
   end
 end
