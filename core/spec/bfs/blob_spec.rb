@@ -2,12 +2,15 @@ require 'spec_helper'
 
 RSpec.describe BFS::Blob, core: true do
   describe 'default' do
-    let(:bucket) { BFS::Bucket::InMem.new }
-    before       { allow(BFS).to receive(:resolve).and_return(bucket) }
     subject      { described_class.new('memtest://bucket/path/to/file.txt') }
+
+    let(:bucket) { BFS::Bucket::InMem.new }
+
+    before       { allow(BFS).to receive(:resolve).and_return(bucket) }
+
     after        { subject.close }
 
-    it 'should move' do
+    it 'moves' do
       expect(subject.path).to eq('path/to/file.txt')
       expect { subject.mv('/to/other/path.txt') }.to raise_error(BFS::FileNotFound)
 
@@ -16,7 +19,7 @@ RSpec.describe BFS::Blob, core: true do
       expect(subject.path).to eq('to/other/path.txt')
     end
 
-    it 'should write/read' do
+    it 'write/reads' do
       expect { subject.read }.to raise_error(BFS::FileNotFound)
       subject.write('TESTDATA', content_type: 'text/plain', metadata: { 'x-key' => 'val' })
 
@@ -36,12 +39,14 @@ RSpec.describe BFS::Blob, core: true do
   end
 
   describe 'file system' do
-    let(:tmpdir) { Dir.mktmpdir }
-    let(:path)   { "#{tmpdir}/path/to/file.txt".sub('/', '') }
-    after   { FileUtils.rm_rf tmpdir }
     subject { described_class.new("file:///#{path}") }
 
-    it 'should move' do
+    let(:tmpdir) { Dir.mktmpdir }
+    let(:path)   { "#{tmpdir}/path/to/file.txt".sub('/', '') }
+
+    after { FileUtils.rm_rf tmpdir }
+
+    it 'moves' do
       expect(subject.path).to eq(path)
       expect { subject.mv("#{tmpdir}/to/other/path.txt") }.to raise_error(BFS::FileNotFound)
 
@@ -54,7 +59,7 @@ RSpec.describe BFS::Blob, core: true do
       ]
     end
 
-    it 'should write/read' do
+    it 'write/reads' do
       expect { subject.read }.to raise_error(BFS::FileNotFound)
 
       subject.write('TESTDATA', content_type: 'text/plain', metadata: { 'x-key' => 'val' })
