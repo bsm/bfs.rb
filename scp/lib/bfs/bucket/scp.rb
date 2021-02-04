@@ -171,7 +171,7 @@ module BFS
 
         if block_given? && stdout.length.positive?
           yield stdout
-          stdout = ''
+          stdout.clear
         end
 
         @client.session.loop
