@@ -3,7 +3,7 @@ require 'spec_helper'
 # silence warnings
 module Google::Auth::CredentialsLoader
   def warn_if_cloud_sdk_credentials(*); end
-  module_function :warn_if_cloud_sdk_credentials # rubocop:disable Style/AccessModifierDeclarations
+  module_function :warn_if_cloud_sdk_credentials
 end
 
 bucket_name = 'bsm-bfs-unittest'
