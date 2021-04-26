@@ -9,8 +9,8 @@ RSpec.describe BFS::Bucket::S3, s3: true do
 
   let(:prefix) { "x/#{SecureRandom.uuid}/" }
 
-  after :all do # rubocop:disable RSpec/BeforeAfterAll
-    bucket = described_class.new bucket_name, prefix: 'x/'
+  after do
+    bucket = described_class.new bucket_name, prefix: prefix
     bucket.ls.each {|name| bucket.rm(name) }
   end
 
