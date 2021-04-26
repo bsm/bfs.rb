@@ -3,7 +3,7 @@ require 'spec_helper'
 # silence warnings
 module Google::Auth::CredentialsLoader
   def warn_if_cloud_sdk_credentials(*); end
-  module_function :warn_if_cloud_sdk_credentials # rubocop:disable Style/AccessModifierDeclarations
+  module_function :warn_if_cloud_sdk_credentials
 end
 
 bucket_name = 'bsm-bfs-unittest'
@@ -15,8 +15,8 @@ RSpec.describe BFS::Bucket::GS, gs: true do
 
   let(:prefix) { "x/#{SecureRandom.uuid}/" }
 
-  after :all do # rubocop:disable RSpec/BeforeAfterAll
-    bucket = described_class.new bucket_name, prefix: 'x/'
+  after do
+    bucket = described_class.new bucket_name, prefix: prefix
     bucket.ls.each {|name| bucket.rm(name) }
   end
 

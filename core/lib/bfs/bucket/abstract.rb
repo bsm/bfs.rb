@@ -107,7 +107,7 @@ module BFS
       def norm_meta(meta)
         norm = {}
         meta.each do |key, value|
-          nkey = key.to_s.downcase.split(/-/).map(&:capitalize).join('-')
+          nkey = key.to_s.downcase.split('-').map(&:capitalize).join('-')
           norm[nkey] = value
         end if meta.is_a?(Hash)
         norm
