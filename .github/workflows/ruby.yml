@@ -1,0 +1,35 @@
+name: Ruby
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby-version: ["2.6", "2.7", "3.0"]
+    services:
+      ftp_server:
+        image: delfer/alpine-ftp-server
+        ports:
+          - 7021:21
+          - 21000-21010:21000-21010
+        env:
+          USERS: "ftpuser|ftppass"
+      ssh_server:
+        image: sickp/alpine-sshd:7.5-r2
+        ports:
+          - 7022:22
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby-version }}
+          bundler-cache: true
+      - run: bundle exec rake
+        env:
+          SPEC_OPTS: "--tag ~gs --tag ~s3"
