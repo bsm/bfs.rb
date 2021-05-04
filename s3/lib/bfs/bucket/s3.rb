@@ -144,6 +144,11 @@ module BFS
         config[:credentials] = opts[:credentials] if opts[:credentials]
         config[:credentials] ||= Aws::Credentials.new(opts[:access_key_id].to_s, opts[:secret_access_key].to_s) if opts[:access_key_id]
         config[:credentials] ||= Aws::SharedCredentials.new(profile_name: opts[:profile_name]) if opts[:profile_name]
+        config[:credentials] = Aws::AssumeRoleCredentials.new(
+          client: Aws::STS::Client.new(credentials: config[:credentials]),
+          role_arn: opts[:assume_role],
+          role_session_name: "#{opts[:assume_role]}_#{SecureRandom.urlsafe_base64(12)}",
+        ) if opts[:assume_role]
 
         Aws::S3::Client.new(config)
       end
