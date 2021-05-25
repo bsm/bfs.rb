@@ -40,6 +40,11 @@ module BFS
         raise 'not implemented'
       end
 
+      # Iterates over the contents of a bucket using a glob pattern
+      def glob(_pattern = '**', **_opts)
+        raise 'not implemented'
+      end
+
       # Info returns the info for a single file
       def info(_path, **_opts)
         raise 'not implemented'

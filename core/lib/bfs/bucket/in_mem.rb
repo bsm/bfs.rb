@@ -36,8 +36,17 @@ module BFS
       # Lists the contents of a bucket using a glob pattern
       def ls(pattern = '**/*', **_opts)
         Enumerator.new do |y|
-          @files.each_key do |key|
-            y << key if File.fnmatch?(pattern, key, File::FNM_PATHNAME)
+          @files.each_key do |path|
+            y << path if File.fnmatch?(pattern, path, File::FNM_PATHNAME)
+          end
+        end
+      end
+
+      # Iterates over the contents of a bucket using a glob pattern
+      def glob(pattern = '**/*', **_opts)
+        Enumerator.new do |y|
+          @files.each_key do |path|
+            y << file_info(path) if File.fnmatch?(pattern, path, File::FNM_PATHNAME)
           end
         end
       end
@@ -47,8 +56,7 @@ module BFS
         path = norm_path(path)
         raise BFS::FileNotFound, path unless @files.key?(path)
 
-        entry = @files[path]
-        BFS::FileInfo.new(path: path, size: entry.io.size, mtime: entry.mtime, content_type: entry.content_type, metadata: entry.metadata)
+        file_info(path)
       end
 
       # Creates a new file and opens it for writing.
@@ -83,6 +91,13 @@ module BFS
       # Deletes a file.
       def rm(path, **_opts)
         @files.delete(norm_path(path))
+      end
+
+      private
+
+      def file_info(path)
+        entry = @files[path]
+        BFS::FileInfo.new path: path, size: entry.io.size, mtime: entry.mtime, content_type: entry.content_type, metadata: entry.metadata
       end
     end
   end

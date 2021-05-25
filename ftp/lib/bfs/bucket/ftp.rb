@@ -35,8 +35,20 @@ module BFS
         dir&.chomp!('/')
 
         Enumerator.new do |y|
-          glob(dir) do |path|
+          walk(dir) do |path, _|
             y << path if File.fnmatch?(pattern, path, File::FNM_PATHNAME)
+          end
+        end
+      end
+
+      # Iterates over the contents of a bucket using a glob pattern
+      def glob(pattern = '**/*', **_opts)
+        dir = pattern[%r{^[^*?\{\}\[\]]+/}]
+        dir&.chomp!('/')
+
+        Enumerator.new do |y|
+          walk(dir) do |path, entry|
+            y << file_info(path, entry) if File.fnmatch?(pattern, path, File::FNM_PATHNAME)
           end
         end
       end
@@ -84,14 +96,21 @@ module BFS
 
       private
 
-      def glob(dir, &block)
-        @client.ls(dir || '.') do |e|
-          entry = Net::FTP::List.parse(e)
+      def file_info(path, entry)
+        mtime = entry.mtime + entry.mtime.utc_offset # HACK: adjust mtime
+        BFS::FileInfo.new(path: path, size: entry.filesize, mtime: mtime)
+      end
+
+      def walk(dir, &block)
+        entries = @client.list(dir || '.')
+        entries.each do |ent|
+          entry = Net::FTP::List.parse(ent)
           if entry.dir?
             subdir = [dir, entry.basename].compact.join('/')
-            glob subdir, &block
+            walk(subdir, &block)
           elsif entry.file?
-            yield [dir, entry.basename].compact.join('/')
+            path = [dir, entry.basename].compact.join('/')
+            yield(path, entry)
           end
         end
       end
