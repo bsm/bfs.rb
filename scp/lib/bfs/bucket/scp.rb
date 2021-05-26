@@ -58,9 +58,11 @@ module BFS
       def info(path, **_opts)
         full = full_path(path)
         path = norm_path(path)
-        out  = sh! %(stat -c '%s;%Z;%a' #{Shellwords.escape full})
+        out  = sh! %(stat -c '%F;%s;%Z;%a' #{Shellwords.escape full})
 
-        size, epoch, mode = out.strip.split(';', 3)
+        type, size, epoch, mode = out.strip.split(';', 4)
+        raise BFS::FileNotFound, path unless type.include?('file')
+
         BFS::FileInfo.new(path: path, size: size.to_i, mtime: Time.at(epoch.to_i), mode: BFS.norm_mode(mode))
       rescue CommandError => e
         e.status == 1 ? raise(BFS::FileNotFound, path) : raise

@@ -15,26 +15,30 @@ module BFS
 
       # Lists the contents of a bucket using a glob pattern
       def ls(pattern = '**/*', **_opts)
-        Enumerator.new do |y|
-          Pathname.glob(@root.join(pattern)) do |path|
-            y << trim_prefix(path.to_s) if path.file?
+        Enumerator.new do |acc|
+          walk(pattern) do |path, _|
+            acc << path
           end
         end
       end
 
       # Iterates over the contents of a bucket using a glob pattern
       def glob(pattern = '**/*', **_opts)
-        Enumerator.new do |y|
-          Pathname.glob(@root.join(pattern)) do |pn|
-            y << file_info(pn) if pn.file?
+        Enumerator.new do |acc|
+          walk(pattern) do |path, stat|
+            acc << file_info(path, stat)
           end
         end
       end
 
       # Info returns the info for a single file
       def info(path, **_opts)
-        pn = @root.join(norm_path(path))
-        file_info(pn)
+        norm = norm_path(path)
+        pn   = @root.join(norm)
+        stat = pn.stat
+        raise BFS::FileNotFound, path unless stat.file?
+
+        file_info(norm, stat)
       rescue Errno::ENOENT
         raise BFS::FileNotFound, path
       end
@@ -103,9 +107,14 @@ module BFS
 
       private
 
-      def file_info(pname)
-        path = trim_prefix(pname.to_s)
-        stat = pname.stat
+      def walk(pattern)
+        Pathname.glob(@root.join(pattern)) do |pn|
+          stat = pn.stat
+          yield(trim_prefix(pn.to_s), stat) if stat.file?
+        end
+      end
+
+      def file_info(path, stat)
         BFS::FileInfo.new(path: path, size: stat.size, mtime: stat.mtime, mode: BFS.norm_mode(stat.mode))
       end
     end

@@ -62,6 +62,7 @@ RSpec.shared_examples 'a bucket' do |features|
     expect(info.metadata).to eq('Meta-Key' => 'VaLuE') unless features[:metadata] == false
 
     expect { subject.info('missing.txt') }.to raise_error(BFS::FileNotFound)
+    expect { subject.info('/a/b') }.to raise_error(BFS::FileNotFound)
   end
 
   it 'write/reads' do
