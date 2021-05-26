@@ -142,9 +142,9 @@ module BFS
         config[:credentials] ||= Aws::Credentials.new(opts[:access_key_id].to_s, opts[:secret_access_key].to_s) if opts[:access_key_id]
         config[:credentials] ||= Aws::SharedCredentials.new(profile_name: opts[:profile_name]) if opts[:profile_name]
         config[:credentials] = Aws::AssumeRoleCredentials.new(
-          client: Aws::STS::Client.new(credentials: config[:credentials]),
+          client: config[:credentials] ? Aws::STS::Client.new(credentials: config[:credentials]) : nil,
           role_arn: opts[:assume_role],
-          role_session_name: "#{opts[:assume_role]}_#{SecureRandom.urlsafe_base64(12)}",
+          role_session_name: SecureRandom.urlsafe_base64(12),
         ) if opts[:assume_role]
 
         Aws::S3::Client.new(config)
@@ -175,7 +175,7 @@ end
 BFS.register('s3') do |url, opts, block|
   prefix = BFS.norm_path(opts[:prefix] || url.path)
   opts[:prefix] = prefix.empty? ? nil : prefix
-  opts = opts.slice(:prefix, :region, :sse, :access_key_id, :secret_access_key, :acl, :storage_class, :encoding)
+  opts = opts.slice(:prefix, :region, :sse, :access_key_id, :secret_access_key, :acl, :storage_class, :encoding, :assume_role)
 
   BFS::Bucket::S3.open url.host, **opts, &block
 end
