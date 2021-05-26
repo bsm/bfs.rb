@@ -50,7 +50,7 @@ module BFS
       # Iterates over the contents of a bucket using a glob pattern
       def glob(pattern = '**/*', **_opts)
         Enumerator.new do |acc|
-          walk(pattern, with_stat: true) {|path| acc << path }
+          walk(pattern, with_stat: true) {|info| acc << info }
         end
       end
 
