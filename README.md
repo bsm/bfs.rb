@@ -1,18 +1,18 @@
 # BFS
 
-[![Build Status](https://travis-ci.org/bsm/bfs.rb.png?branch=master)](https://travis-ci.org/bsm/bfs.rb)
+[![Build Status](https://github.com/bsm/bfs.rb/actions/workflows/test.yml/badge.svg)](https://github.com/bsm/bfs.rb/actions/workflows/test.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Abstraction for bucket storage.
 
 ## Supported backends
 
-* [In-memory](https://rubygems.org/gems/bfs) - for testing
-* [Local file system](https://rubygems.org/gems/bfs) - supports `file://` URLs
-* [(S)FTP](https://rubygems.org/gems/bfs-ftp) - supports `ftp://` and `sftp://` URLs
-* [Google Cloud Storage](https://rubygems.org/gems/bfs-gs) - supports `gs://` URLs
-* [Amazon S3](https://rubygems.org/gems/bfs-s3) - supports `s3://` URLs
-* [SCP](https://rubygems.org/gems/bfs-scp) - supports `scp://` URLs
+- [In-memory](https://rubygems.org/gems/bfs) - for testing
+- [Local file system](https://rubygems.org/gems/bfs) - supports `file://` URLs
+- [(S)FTP](https://rubygems.org/gems/bfs-ftp) - supports `ftp://` and `sftp://` URLs
+- [Google Cloud Storage](https://rubygems.org/gems/bfs-gs) - supports `gs://` URLs
+- [Amazon S3](https://rubygems.org/gems/bfs-s3) - supports `s3://` URLs
+- [SCP](https://rubygems.org/gems/bfs-scp) - supports `scp://` URLs
 
 ## Installation
 

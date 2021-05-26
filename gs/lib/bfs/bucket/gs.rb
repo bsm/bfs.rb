@@ -33,14 +33,18 @@ module BFS
 
       # Lists the contents of a bucket using a glob pattern
       def ls(pattern = '**/*', **opts)
-        prefix = pattern[%r{^[^*?\{\}\[\]]+/}]
-        prefix = File.join(*[@prefix, prefix].compact) if @prefix
-        opts   = opts.merge(prefix: prefix) if prefix
+        Enumerator.new do |acc|
+          walk(pattern, **opts) do |name, _|
+            acc << name
+          end
+        end
+      end
 
-        Enumerator.new do |y|
-          @bucket.files(**opts).all do |file|
-            name = trim_prefix(file.name)
-            y << name if File.fnmatch?(pattern, name, File::FNM_PATHNAME)
+      # Iterates over the contents of a bucket using a glob pattern
+      def glob(pattern = '**/*', **opts)
+        Enumerator.new do |acc|
+          walk(pattern, **opts) do |name, file|
+            acc << file_info(name, file)
           end
         end
       end
@@ -52,7 +56,7 @@ module BFS
         raise BFS::FileNotFound, trim_prefix(path) unless file
 
         name = trim_prefix(file.name)
-        BFS::FileInfo.new(path: name, size: file.size, mtime: file.updated_at.to_time, content_type: file.content_type, metadata: norm_meta(file.metadata))
+        file_info(name, file)
       end
 
       # Creates a new file and opens it for writing
@@ -93,6 +97,23 @@ module BFS
         raise BFS::FileNotFound, trim_prefix(src) unless file
 
         file.copy(full_path(dst), **opts)
+      end
+
+      private
+
+      def walk(pattern, **opts)
+        prefix = pattern[%r{^[^*?\{\}\[\]]+/}]
+        prefix = File.join(*[@prefix, prefix].compact) if @prefix
+        opts   = opts.merge(prefix: prefix) if prefix
+
+        @bucket.files(**opts).all do |file|
+          name = trim_prefix(file.name)
+          yield(name, file) if File.fnmatch?(pattern, name, File::FNM_PATHNAME)
+        end
+      end
+
+      def file_info(name, file)
+        BFS::FileInfo.new(path: name, size: file.size, mtime: file.updated_at.to_time, content_type: file.content_type, metadata: norm_meta(file.metadata))
       end
     end
   end

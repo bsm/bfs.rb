@@ -33,22 +33,19 @@ module BFS
 
       # Lists the contents of a bucket using a glob pattern
       def ls(pattern = '**/*', **opts)
-        prefix = pattern[%r{^[^*?\{\}\[\]]+/}]
-        prefix = File.join(*[@prefix, prefix].compact) if @prefix
+        Enumerator.new do |acc|
+          walk(pattern, **opts) do |path, _|
+            acc << path
+          end
+        end
+      end
 
-        opts = opts.merge(bucket: name, prefix: @prefix)
-        opts[:prefix] = prefix if prefix
-
-        next_token = nil
-        Enumerator.new do |y|
-          loop do
-            resp = @client.list_objects_v2 opts.merge(continuation_token: next_token)
-            resp.contents.each do |obj|
-              name = trim_prefix(obj.key)
-              y << name if File.fnmatch?(pattern, name, File::FNM_PATHNAME)
-            end
-            next_token = resp.next_continuation_token.to_s
-            break if next_token.empty?
+      # Iterates over the contents of a bucket using a glob pattern
+      def glob(pattern = '**/*', **opts)
+        Enumerator.new do |acc|
+          walk(pattern, **opts) do |path, obj|
+            info = BFS::FileInfo.new(path: path, size: obj.size, mtime: obj.last_modified)
+            acc << info
           end
         end
       end
@@ -60,7 +57,7 @@ module BFS
         info = @client.head_object(**opts)
         raise BFS::FileNotFound, path unless info
 
-        BFS::FileInfo.new(path: path, size: info.content_length, mtime: info.last_modified, content_type: info.content_type, metadata: norm_meta(info.metadata))
+        BFS::FileInfo.new path: path, size: info.content_length, mtime: info.last_modified, content_type: info.content_type, metadata: norm_meta(info.metadata)
       rescue Aws::S3::Errors::NoSuchKey, Aws::S3::Errors::NoSuchBucket, Aws::S3::Errors::NotFound
         raise BFS::FileNotFound, path
       end
@@ -151,6 +148,25 @@ module BFS
         ) if opts[:assume_role]
 
         Aws::S3::Client.new(config)
+      end
+
+      def walk(pattern, **opts)
+        prefix = pattern[%r{^[^*?\{\}\[\]]+/}]
+        prefix = File.join(*[@prefix, prefix].compact) if @prefix
+
+        opts = opts.merge(bucket: name, prefix: @prefix)
+        opts[:prefix] = prefix if prefix
+
+        next_token = nil
+        loop do
+          resp = @client.list_objects_v2 opts.merge(continuation_token: next_token)
+          resp.contents.each do |obj|
+            path = trim_prefix(obj.key)
+            yield(path, obj) if File.fnmatch?(pattern, path, File::FNM_PATHNAME)
+          end
+          next_token = resp.next_continuation_token.to_s
+          break if next_token.empty?
+        end
       end
     end
   end

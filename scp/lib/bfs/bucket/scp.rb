@@ -42,14 +42,15 @@ module BFS
 
       # Lists the contents of a bucket using a glob pattern
       def ls(pattern = '**/*', **_opts)
-        prefix = @prefix ? abs_path(@prefix) : '/'
-        Enumerator.new do |y|
-          sh! 'find', prefix, '-type', 'f' do |out|
-            out.each_line do |line|
-              path = trim_prefix(norm_path(line.strip))
-              y << path if File.fnmatch?(pattern, path, File::FNM_PATHNAME)
-            end
-          end
+        Enumerator.new do |acc|
+          walk(pattern) {|path| acc << path }
+        end
+      end
+
+      # Iterates over the contents of a bucket using a glob pattern
+      def glob(pattern = '**/*', **_opts)
+        Enumerator.new do |acc|
+          walk(pattern, with_stat: true) {|info| acc << info }
         end
       end
 
@@ -57,9 +58,11 @@ module BFS
       def info(path, **_opts)
         full = full_path(path)
         path = norm_path(path)
-        out  = sh! 'stat', '-c', '%s;%Z;%a', full
+        out  = sh! %(stat -c '%F;%s;%Z;%a' #{Shellwords.escape full})
 
-        size, epoch, mode = out.strip.split(';', 3)
+        type, size, epoch, mode = out.strip.split(';', 4)
+        raise BFS::FileNotFound, path unless type.include?('file')
+
         BFS::FileInfo.new(path: path, size: size.to_i, mtime: Time.at(epoch.to_i), mode: BFS.norm_mode(mode))
       rescue CommandError => e
         e.status == 1 ? raise(BFS::FileNotFound, path) : raise
@@ -93,7 +96,7 @@ module BFS
       # Deletes a file.
       def rm(path, **_opts)
         path = full_path(path)
-        sh! 'rm', '-f', path
+        sh! %(rm -f #{Shellwords.escape(path)})
       end
 
       # Copies src to dst
@@ -105,7 +108,7 @@ module BFS
         full_dst = full_path(dst)
 
         mkdir_p File.dirname(full_dst)
-        sh! 'cp', '-a', '-f', full_src, full_dst
+        sh! %(cp -a -f #{Shellwords.escape(full_src)} #{Shellwords.escape(full_dst)})
       rescue CommandError => e
         e.status == 1 ? raise(BFS::FileNotFound, src) : raise
       end
@@ -119,7 +122,7 @@ module BFS
         full_dst = full_path(dst)
 
         mkdir_p File.dirname(full_dst)
-        sh! 'mv', '-f', full_src, full_dst
+        sh! %(mv -f #{Shellwords.escape(full_src)} #{Shellwords.escape(full_dst)})
       rescue CommandError => e
         e.status == 1 ? raise(BFS::FileNotFound, src) : raise
       end
@@ -140,18 +143,41 @@ module BFS
         abs_path(super)
       end
 
-      def mkdir_p(path)
-        sh! 'mkdir', '-p', path
+      def walk(pattern, with_stat: false)
+        prefix  = @prefix ? abs_path(@prefix) : '/'
+        command = %(find #{Shellwords.escape(prefix)} -type f)
+        command << %( -exec stat -c '%s;%Z;%a;%n' {} \\;) if with_stat
+
+        sh!(command) do |out|
+          out.each_line do |line|
+            line.strip!
+
+            if with_stat
+              size, epoch, mode, path = out.strip.split(';', 4)
+              path = trim_prefix(norm_path(path))
+              next unless File.fnmatch?(pattern, path, File::FNM_PATHNAME)
+
+              info = BFS::FileInfo.new(path: path, size: size.to_i, mtime: Time.at(epoch.to_i), mode: BFS.norm_mode(mode))
+              yield info
+            else
+              path = trim_prefix(norm_path(line))
+              yield path if File.fnmatch?(pattern, path, File::FNM_PATHNAME)
+            end
+          end
+        end
       end
 
-      def sh!(*cmd) # rubocop:disable Metrics/MethodLength
+      def mkdir_p(path)
+        sh! %(mkdir -p #{Shellwords.escape(path)})
+      end
+
+      def sh!(command) # rubocop:disable Metrics/MethodLength
         stdout = ''
         stderr = nil
         status = 0
-        cmdstr = cmd.map {|x| Shellwords.escape(x) }.join(' ')
 
         @client.session.open_channel do |ch|
-          ch.exec(cmdstr) do |_, _success|
+          ch.exec(command) do |_, _success|
             ch.on_data do |_, data|
               stdout << data
 
@@ -175,7 +201,7 @@ module BFS
         end
 
         @client.session.loop
-        raise CommandError.new(cmdstr, status, stderr) unless status.zero?
+        raise CommandError.new(command, status, stderr) unless status.zero?
 
         stdout
       end

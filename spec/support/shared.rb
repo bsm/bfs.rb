@@ -10,11 +10,15 @@ RSpec.shared_examples 'a bucket' do |features|
     subject.write 'a/b/c/d/e.txt', 'TESTDATA-e'
   end
 
+  def be_recent_time
+    be_within(90).of(Time.now)
+  end
+
   after do
     subject.close
   end
 
-  it 'lses' do
+  it 'lists' do
     expect(subject.ls).to be_a(Enumerator)
     expect(subject.ls.to_a).to match_array [
       'a/b.txt',
@@ -31,16 +35,34 @@ RSpec.shared_examples 'a bucket' do |features|
     expect(subject.ls('x/**').to_a).to be_empty
   end
 
+  it 'globs' do
+    expect(subject.glob).to be_a(Enumerator)
+    expect(subject.glob.to_a.sort_by(&:path)).to match [
+      include(path: 'a/b.txt', size: 10, mtime: be_recent_time),
+      include(path: 'a/b/c.txt', size: 10, mtime: be_recent_time),
+      include(path: 'a/b/c/d.txt', size: 10, mtime: be_recent_time),
+      include(path: 'a/b/c/d/e.txt', size: 10, mtime: be_recent_time),
+    ]
+    expect(subject.glob('**/c*').to_a).to match [
+      include(path: 'a/b/c.txt', size: 10, mtime: be_recent_time),
+    ]
+    expect(subject.glob('a/b/*/*').to_a).to match [
+      include(path: 'a/b/c/d.txt', size: 10, mtime: be_recent_time),
+    ]
+    expect(subject.glob('x/**').to_a).to be_empty
+  end
+
   it 'returns info' do
     info = subject.info('/a/b/c.txt')
     expect(info.path).to eq('a/b/c.txt')
     expect(info.size).to eq(10)
-    expect(info.mtime).to be_within(30).of(Time.now)
+    expect(info.mtime).to be_recent_time
 
     expect(info.content_type).to eq('text/plain') unless features[:content_type] == false
     expect(info.metadata).to eq('Meta-Key' => 'VaLuE') unless features[:metadata] == false
 
     expect { subject.info('missing.txt') }.to raise_error(BFS::FileNotFound)
+    expect { subject.info('/a/b') }.to raise_error(BFS::FileNotFound)
   end
 
   it 'write/reads' do
