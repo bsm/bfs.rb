@@ -141,13 +141,18 @@ module BFS
         config[:credentials] = opts[:credentials] if opts[:credentials]
         config[:credentials] ||= Aws::Credentials.new(opts[:access_key_id].to_s, opts[:secret_access_key].to_s) if opts[:access_key_id]
         config[:credentials] ||= Aws::SharedCredentials.new(profile_name: opts[:profile_name]) if opts[:profile_name]
-        config[:credentials] = Aws::AssumeRoleCredentials.new(
-          client: config[:credentials] ? Aws::STS::Client.new(credentials: config[:credentials]) : nil,
-          role_arn: opts[:assume_role],
-          role_session_name: SecureRandom.urlsafe_base64(12),
-        ) if opts[:assume_role]
+        config[:credentials] = assume_role_credentials(opts[:assume_role], config[:credentials]) if opts[:assume_role]
 
         Aws::S3::Client.new(config)
+      end
+
+      def assume_role_credentials(role_arn, credentials = nil)
+        opts = {
+          role_arn: role_arn,
+          role_session_name: SecureRandom.urlsafe_base64(12),
+        }
+        opts[:client] = Aws::STS::Client.new(credentials: credentials) if credentials
+        Aws::AssumeRoleCredentials.new(**opts)
       end
 
       def walk(pattern, **opts)
