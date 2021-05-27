@@ -91,8 +91,7 @@ module BFS
       private
 
       def file_info(path, entry)
-        mtime = entry.mtime + entry.mtime.utc_offset # HACK: adjust mtime
-        BFS::FileInfo.new(path: path, size: entry.filesize, mtime: mtime)
+        BFS::FileInfo.new(path: path, size: entry.filesize, mtime: entry.mtime)
       end
 
       def walk(pattern, &block)
