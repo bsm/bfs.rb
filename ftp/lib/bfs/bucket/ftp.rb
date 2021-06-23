@@ -125,7 +125,7 @@ module BFS
   end
 end
 
-BFS.register('ftp', 'sftp') do |url, opts, block|
+BFS.register('ftp') do |url, opts, block|
   prefix = BFS.norm_path(opts[:prefix] || url.path)
   opts[:prefix] = prefix unless prefix.empty?
 
@@ -133,7 +133,7 @@ BFS.register('ftp', 'sftp') do |url, opts, block|
     username: url.user ? CGI.unescape(url.user) : nil,
     password: url.password ? CGI.unescape(url.password) : nil,
     port: url.port,
-    ssl: opts.key?(:ssl) || url.scheme == 'sftp',
+    ssl: opts.key?(:ssl),
   }
   BFS::Bucket::FTP.open url.host, **opts, **extra, &block
 end
