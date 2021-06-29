@@ -107,7 +107,7 @@ module BFS
         BFS::FileInfo.new(path: path, size: attrs.size.to_i, mtime: Time.at(attrs.mtime.to_i), mode: BFS.norm_mode(attrs.permissions))
       end
 
-      def walk(pattern, with_stat: false)
+      def walk(pattern)
         @session.sftp.dir.glob(@prefix || '/', pattern) do |ent|
           next unless ent.file?
 
@@ -120,7 +120,7 @@ module BFS
         parts = path.split('/').reject(&:empty?)
         (0...parts.size).map do |i|
           @session.sftp.mkdir parts[0..i].join('/')
-        end.each_with_index do |req, _i|
+        end.each do |req|
           req.wait
           next if req.response.code <= StatusCodes::FX_FAILURE
 
