@@ -118,9 +118,10 @@ module BFS
 
       def mkdir_p(path)
         parts = path.split('/').reject(&:empty?)
-        (0...parts.size).map do |i|
+        cmds  = (0...parts.size).map do |i|
           @session.sftp.mkdir parts[0..i].join('/')
-        end.each do |req|
+        end
+        cmds.each do |req|
           req.wait
           next if req.response.code <= StatusCodes::FX_FAILURE
 
