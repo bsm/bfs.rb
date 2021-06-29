@@ -1,6 +1,5 @@
 require 'bfs'
 require 'net/scp'
-require 'net/ssh'
 require 'shellwords'
 
 module BFS
@@ -32,7 +31,7 @@ module BFS
         super(**opts)
 
         @prefix = prefix
-        @client = Net::SCP.start(host, nil, **opts.slice(*Net::SSH::VALID_OPTIONS))
+        @client = Net::SCP.start(host, nil, **opts.slice(*Net::SSH::VALID_OPTIONS), non_interactive: true)
 
         if @prefix # rubocop:disable Style/GuardClause
           @prefix = "#{norm_path(@prefix)}/"

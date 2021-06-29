@@ -13,17 +13,21 @@ jobs:
       matrix:
         ruby-version: ["2.6", "2.7", "3.0"]
     services:
-      ftp_server:
+      ftp:
         image: delfer/alpine-ftp-server
         ports:
           - 7021:21
           - 21000-21010:21000-21010
         env:
-          USERS: "ftpuser|ftppass"
-      ssh_server:
+          USERS: "user|pass"
+      ssh:
         image: sickp/alpine-sshd:7.5-r2
         ports:
           - 7022:22
+      sftp:
+        image: watersalesman/sftp-alpine
+        ports:
+          - 7023:22
     steps:
       - uses: actions/checkout@v2
       - uses: ruby/setup-ruby@v1
