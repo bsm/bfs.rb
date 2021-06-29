@@ -25,11 +25,9 @@ jobs:
         ports:
           - 7022:22
       sftp:
-        image: netresearch/sftp
+        image: watersalesman/sftp-alpine
         ports:
           - 7023:22
-        options: >-
-          user:pass:::upload
     steps:
       - uses: actions/checkout@v2
       - uses: ruby/setup-ruby@v1

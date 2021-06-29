@@ -12,8 +12,6 @@ services:
     ports:
       - "7022:22"
   sftp:
-    image: netresearch/sftp
+    image: watersalesman/sftp-alpine
     ports:
       - "7023:22"
-    command:
-      - "user:pass:::upload"
