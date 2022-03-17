@@ -18,7 +18,7 @@ module BFS
       # @option opts [Boolean] :keepalive use keepalive.
       # @option opts [Integer] :keepalive_interval interval if keepalive enabled. Default: 300.
       # @option opts [Array<String>] :keys an array of file names of private keys to use for publickey and hostbased authentication.
-      # @option opts [Boolean|Symbol] :verify_host_key specifying how strict host-key verification should be, either false, true, :very, or :secure.
+      # @option opts [Symbol] :verify_host_key specifying how strict host-key verification should be, either :never, :accept_new_or_local_tunnel, :accept_new, or :always.
       def initialize(host, prefix: nil, **opts)
         super(**opts)
 
@@ -138,6 +138,7 @@ BFS.register('sftp') do |url, opts, block|
   opts[:user] ||= CGI.unescape(url.user) if url.user
   opts[:password] ||= CGI.unescape(url.password) if url.password
   opts[:port] ||= url.port if url.port
+  opts[:verify_host_key] = opts[:verify_host_key].to_sym if opts[:verify_host_key]
 
   BFS::Bucket::SFTP.open(url.host, **opts, &block)
 end

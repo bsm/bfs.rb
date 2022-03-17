@@ -29,6 +29,11 @@ RSpec.describe BFS::Bucket::SCP, scp: true do
     expect(bucket).to be_instance_of(described_class)
     expect(bucket.instance_variable_get(:@prefix)).to eq('a/b/')
     bucket.close
+
+    bucket = BFS.resolve('scp://root:root@127.0.0.1:7022?verify_host_key=never')
+    expect(bucket).to be_instance_of(described_class)
+    expect(bucket.instance_variable_get(:@client).session.transport.host_key_verifier).to be_instance_of(Net::SSH::Verifiers::Never)
+    bucket.close
   end
 
   it 'handles absolute and relative paths' do

@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- spec/*`.split("\n")
   s.require_paths = ['lib']
-  s.required_ruby_version = '>= 2.6.0'
+  s.required_ruby_version = '>= 2.7'
 
   s.add_dependency 'aws-sdk-s3', '~> 1.38'
   s.add_dependency 'bfs', s.version

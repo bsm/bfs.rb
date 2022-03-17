@@ -15,8 +15,9 @@ Gem::Specification.new do |s|
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- spec/*`.split("\n")
   s.require_paths = ['lib']
-  s.required_ruby_version = '>= 2.6.0'
+  s.required_ruby_version = '>= 2.7'
 
   s.add_dependency 'bfs', s.version
+  s.add_dependency 'net-ftp', '>= 0.1.3'
   s.add_dependency 'net-ftp-list'
 end
