@@ -18,7 +18,7 @@ module BFS
       # @option opts [Boolean] :keepalive use keepalive.
       # @option opts [Integer] :keepalive_interval interval if keepalive enabled. Default: 300.
       # @option opts [Array<String>] :keys an array of file names of private keys to use for publickey and hostbased authentication.
-      # @option opts [Symbol] :verify_host_key specifying how strict host-key verification should be, either :never, :accept_new_or_local_tunnel, :accept_new, or :always.
+      # @option opts [Symbol] :verify_host_key host-key verification should be, either :never, :accept_new_or_local_tunnel, :accept_new, or :always.
       def initialize(host, prefix: nil, **opts)
         super(**opts)
 

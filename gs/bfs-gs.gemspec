@@ -19,4 +19,5 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'bfs', s.version
   s.add_dependency 'google-cloud-storage', '~> 1.18'
+  s.metadata['rubygems_mfa_required'] = 'true'
 end

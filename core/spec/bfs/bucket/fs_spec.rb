@@ -12,7 +12,7 @@ RSpec.describe BFS::Bucket::FS, core: true do
                   metadata: false
 
   it 'resolves from URL' do
-    File.open(File.join(tmpdir, 'test.txt'), 'wb') {|f| f.write 'TESTDATA' }
+    File.binwrite(File.join(tmpdir, 'test.txt'), 'TESTDATA')
 
     bucket = BFS.resolve("file://#{tmpdir}")
     expect(bucket).to be_instance_of(described_class)

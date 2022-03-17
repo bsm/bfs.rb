@@ -19,4 +19,5 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'aws-sdk-s3', '~> 1.38'
   s.add_dependency 'bfs', s.version
+  s.metadata['rubygems_mfa_required'] = 'true'
 end
