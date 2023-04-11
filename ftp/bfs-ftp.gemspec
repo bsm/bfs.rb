@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.7'
 
   s.add_dependency 'bfs', s.version
-  s.add_dependency 'net-ftp', '>= 0.1.3'
+  s.add_dependency 'net-ftp', '< 0.2'
   s.add_dependency 'net-ftp-list'
   s.metadata['rubygems_mfa_required'] = 'true'
 end
