@@ -20,18 +20,9 @@ RSpec.shared_examples 'a bucket' do |features|
 
   it 'lists' do
     expect(subject.ls).to be_a(Enumerator)
-    expect(subject.ls.to_a).to match_array [
-      'a/b.txt',
-      'a/b/c.txt',
-      'a/b/c/d.txt',
-      'a/b/c/d/e.txt',
-    ]
-    expect(subject.ls('**/c*').to_a).to match_array [
-      'a/b/c.txt',
-    ]
-    expect(subject.ls('a/b/*/*').to_a).to match_array [
-      'a/b/c/d.txt',
-    ]
+    expect(subject.ls.to_a).to contain_exactly('a/b.txt', 'a/b/c.txt', 'a/b/c/d.txt', 'a/b/c/d/e.txt')
+    expect(subject.ls('**/c*').to_a).to contain_exactly('a/b/c.txt')
+    expect(subject.ls('a/b/*/*').to_a).to contain_exactly('a/b/c/d.txt')
     expect(subject.ls('x/**').to_a).to be_empty
   end
 
@@ -125,11 +116,7 @@ RSpec.shared_examples 'a bucket' do |features|
   it 'removes' do
     subject.rm('a/b/c.txt')
     subject.rm('not/found.txt')
-    expect(subject.ls).to match_array [
-      'a/b.txt',
-      'a/b/c/d.txt',
-      'a/b/c/d/e.txt',
-    ]
+    expect(subject.ls).to contain_exactly('a/b.txt', 'a/b/c/d.txt', 'a/b/c/d/e.txt')
   end
 
   it 'copies' do

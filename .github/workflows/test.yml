@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ruby-version: ["2.7", "3.0", "3.1"]
+        ruby-version: ["2.7", "3.0", "3.1", "3.2"]
     services:
       ftp:
         image: delfer/alpine-ftp-server
@@ -34,12 +34,13 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby-version }}
           bundler-cache: true
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@master
+      - id: "auth"
+        uses: "google-github-actions/auth@v1"
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          export_default_credentials: true
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
